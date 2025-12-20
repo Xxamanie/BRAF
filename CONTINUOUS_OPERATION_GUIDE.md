@@ -1,14 +1,15 @@
 # BRAF Continuous Operation Guide
 
-## ✅ NOWPayments API Status
+## ✅ MAXEL API Status
 
-**YES - NOWPayments API is fully implemented!**
+**YES - MAXEL API is fully implemented and ready!**
 
 ### Implementation Details:
-- **File:** `monetization-system/payments/nowpayments_integration.py`
+- **File:** `payments/maxel_integration.py`
 - **Status:** ✅ Complete and production-ready
-- **API Key:** Configured (RD7WEXF-QTW4N7P-HMV12F9-MPANF4G)
-- **Supported Currencies:** 150+ cryptocurrencies (BTC, ETH, XMR, USDT, etc.)
+- **API Key:** pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXEL_SECRET_KEY
+- **Secret Key:** sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0
+- **Supported Currencies:** BTC, ETH, USDT, USDC, LTC, BCH, XRP, ADA, DOT, LINK, BNB, MATIC
 
 ### Features Available:
 - ✅ Real cryptocurrency withdrawals
@@ -17,13 +18,13 @@
 - ✅ Transaction status tracking
 - ✅ Balance checking
 - ✅ Real-time exchange rates
-- ✅ Mass payouts
 - ✅ Invoice creation
+- ✅ Address validation
 
-### Test NOWPayments:
+### Test MAXEL:
 ```bash
-cd monetization-system
-python payments/nowpayments_integration.py
+cd BRAF
+python payments/maxel_integration.py
 ```
 
 ---

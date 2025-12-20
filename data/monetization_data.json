@@ -1,31 +1,31 @@
 {
-  "timestamp": "2025-12-20T19:40:47.462077",
+  "timestamp": "2025-12-20T21:36:13.918454",
   "monetization_data": {
-    "total_earnings": 14.05,
-    "pending_earnings": 2.11,
-    "withdrawn_amount": 8.43,
+    "total_earnings": 75.8,
+    "pending_earnings": 11.37,
+    "withdrawn_amount": 45.48,
     "platforms": [
       {
-        "name": "BRAF Live Workers",
-        "total_earned": 14.05,
+        "name": "Continuous BRAF Workers",
+        "total_earned": 75.8,
         "status": "active",
-        "last_updated": "2025-12-20T19:40:47.462110",
-        "tasks_completed": 7
+        "last_updated": "2025-12-20T21:36:13.918492",
+        "tasks_completed": 506
       }
     ],
     "recent_activity": [
       {
         "type": "earning",
-        "title": "Live BRAF Execution",
-        "details": "7 tasks completed in 19.1s",
-        "amount": 1.75,
-        "timestamp": "2025-12-20T19:40:47.462126"
+        "title": "Continuous Run #23",
+        "details": "22 tasks completed successfully",
+        "amount": 5.5,
+        "timestamp": "2025-12-20T21:36:13.918669"
       }
     ],
     "performance": {
       "success_rate": 100.0,
-      "total_tasks": 7,
-      "avg_execution_time": 2.7253055572509766
+      "total_tasks": 22,
+      "avg_execution_time": 3.5
     }
   }
 }
