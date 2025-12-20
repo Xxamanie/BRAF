@@ -28,7 +28,7 @@ colorama>=0.4.6
 
 # Automation & Monetization
 schedule>=1.2.0
-threading  # Built into Python
+# Built into Python
 datetime  # Built into Python
 json  # Built into Python
 
