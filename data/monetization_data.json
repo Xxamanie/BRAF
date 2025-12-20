@@ -1,30 +1,30 @@
 {
-  "timestamp": "2025-12-20T21:36:13.918454",
+  "timestamp": "2025-12-20T22:25:49.851520",
   "monetization_data": {
-    "total_earnings": 75.8,
-    "pending_earnings": 11.37,
-    "withdrawn_amount": 45.48,
+    "total_earnings": 136.55,
+    "pending_earnings": 20.48,
+    "withdrawn_amount": 81.93,
     "platforms": [
       {
         "name": "Continuous BRAF Workers",
-        "total_earned": 75.8,
+        "total_earned": 136.55,
         "status": "active",
-        "last_updated": "2025-12-20T21:36:13.918492",
-        "tasks_completed": 506
+        "last_updated": "2025-12-20T22:25:49.851566",
+        "tasks_completed": 992
       }
     ],
     "recent_activity": [
       {
         "type": "earning",
-        "title": "Continuous Run #23",
-        "details": "22 tasks completed successfully",
-        "amount": 5.5,
-        "timestamp": "2025-12-20T21:36:13.918669"
+        "title": "Continuous Run #32",
+        "details": "31 tasks completed successfully",
+        "amount": 7.75,
+        "timestamp": "2025-12-20T22:25:49.851796"
       }
     ],
     "performance": {
       "success_rate": 100.0,
-      "total_tasks": 22,
+      "total_tasks": 31,
       "avg_execution_time": 3.5
     }
   }
