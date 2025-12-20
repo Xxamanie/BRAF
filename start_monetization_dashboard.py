@@ -17,7 +17,40 @@ def generate_monetization_data():
     """Generate monetization data from earnings database and automation results"""
     dashboard_dir = Path(__file__).parent
     
-    # Initialize monetization data structure
+    # Check if we have existing real data file first
+    data_dir = dashboard_dir / 'data'
+    existing_data_file = data_dir / 'monetization_data.json'
+    
+    if existing_data_file.exists():
+        try:
+            with open(existing_data_file, 'r') as f:
+                existing_data = json.load(f)
+            
+            if 'monetization_data' in existing_data:
+                existing_monetization = existing_data['monetization_data']
+                
+                # Check if this is real worker data (not sample data)
+                platforms = existing_monetization.get('platforms', [])
+                has_real_worker_data = any(
+                    'BRAF Workers' in platform.get('name', '') or 
+                    'GitHub Actions Workers' in platform.get('name', '') or
+                    'Automation Workers' in platform.get('name', '') or
+                    'Scraping Workers' in platform.get('name', '')
+                    for platform in platforms
+                )
+                
+                if has_real_worker_data:
+                    print(f"✅ Using existing real worker earnings data")
+                    print(f"   💰 Real earnings: ${existing_monetization['total_earnings']:.2f}")
+                    print(f"   🏢 Platforms: {len(platforms)}")
+                    
+                    # Update timestamp but keep the real data
+                    existing_monetization['timestamp'] = datetime.now().isoformat()
+                    return existing_monetization
+        except Exception as e:
+            print(f"⚠️  Could not load existing data: {e}")
+    
+    # Initialize monetization data structure for new data
     monetization_data = {
         'total_earnings': 0.0,
         'pending_earnings': 0.0,
@@ -186,7 +219,28 @@ def generate_monetization_data():
         except Exception as e:
             print(f"⚠️  Could not load scraping results: {e}")
     
-    # If no data found, create sample data
+    # Check if we have existing real data file
+    data_dir = Path(__file__).parent / 'data'
+    existing_data_file = data_dir / 'monetization_data.json'
+    
+    if existing_data_file.exists():
+        try:
+            with open(existing_data_file, 'r') as f:
+                existing_data = json.load(f)
+            
+            if 'monetization_data' in existing_data:
+                existing_monetization = existing_data['monetization_data']
+                
+                # Use existing data if it has real earnings
+                if existing_monetization.get('total_earnings', 0) > 0:
+                    print(f"✅ Using existing real worker earnings data")
+                    print(f"   💰 Real earnings: ${existing_monetization['total_earnings']:.2f}")
+                    print(f"   🏢 Platforms: {len(existing_monetization.get('platforms', []))}")
+                    return existing_monetization
+        except Exception as e:
+            print(f"⚠️  Could not load existing data: {e}")
+    
+    # If no real data found, create sample data
     if monetization_data['total_earnings'] == 0:
         print("📊 Generating sample monetization data...")
         
