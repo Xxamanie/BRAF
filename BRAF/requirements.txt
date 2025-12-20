@@ -1,12 +1,22 @@
 # BRAF - Browser Automation Framework Requirements
 
+# Modern async web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
 # Core dependencies
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 lxml>=4.9.0
+aiohttp>=3.9.0
 
 # Browser automation
 playwright>=1.40.0
+
+# Database (async)
+asyncpg>=0.29.0
+sqlalchemy[asyncio]>=2.0.0
 
 # Data processing
 pandas>=2.0.0
@@ -15,10 +25,7 @@ numpy>=1.24.0
 # Machine learning
 scikit-learn>=1.3.0
 
-# Database
-# SQLite3 is built into Python - no need to install
-
-# Web framework (for dashboard)
+# Web framework (legacy support)
 flask>=2.3.0
 
 # Utilities
@@ -28,16 +35,9 @@ colorama>=0.4.6
 
 # Automation & Monetization
 schedule>=1.2.0
-# Built into Python
-datetime  # Built into Python
-json  # Built into Python
 
 # Development and testing
 pytest>=7.4.0
 pytest-asyncio>=0.21.0
 black>=23.0.0
 flake8>=6.0.0
-
-# Optional: Enhanced features
-# uvloop>=0.17.0  # Linux/macOS only
-# aiohttp>=3.8.0  # For async HTTP requests
