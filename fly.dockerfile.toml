@@ -1,9 +1,15 @@
-# Fly.io configuration for BRAF monetization system
+# Fly.io configuration for BRAF monetization system (Dockerfile-based)
+# Use this for custom Docker builds with FLASK_ONLY support
+# Deploy with: fly deploy --config fly.dockerfile.toml
+
 app = "braf"
 primary_region = "iad"
 
 [build]
-  builder = "paketobuildpacks/builder:base"
+  dockerfile = "monetization-system/Dockerfile"
+  # Optional: Use build args for Flask-only deployment
+  # [build.args]
+  #   FLASK_ONLY = "true"
 
 [env]
   FLASK_ENV = "production"
