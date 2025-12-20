@@ -21,7 +21,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy app code
+# Copy app code.
 COPY . .
 
 # Expose port
