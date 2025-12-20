@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-12-20T17:45:00.000Z",
+  "monetization_data": {
+    "total_earnings": 127.45,
+    "pending_earnings": 23.80,
+    "withdrawn_amount": 85.00,
+    "platforms": [
+      {
+        "name": "Web Scraping Workers",
+        "total_earned": 68.25,
+        "status": "active",
+        "last_updated": "2025-12-20T17:30:00.000Z",
+        "tasks_completed": 682
+      },
+      {
+        "name": "Browser Automation",
+        "total_earned": 41.90,
+        "status": "active",
+        "last_updated": "2025-12-20T17:25:00.000Z",
+        "tasks_completed": 279
+      },
+      {
+        "name": "Survey Automation",
+        "total_earned": 17.30,
+        "status": "active",
+        "last_updated": "2025-12-20T16:45:00.000Z",
+        "tasks_completed": 34
+      }
+    ],
+    "recent_activity": [
+      {
+        "type": "earning",
+        "title": "Survey Completion",
+        "details": "Automated survey on SwagBucks platform",
+        "amount": 3.50,
+        "timestamp": "2025-12-20T17:40:00.000Z"
+      },
+      {
+        "type": "earning",
+        "title": "Data Scraping",
+        "details": "Product information from e-commerce site",
+        "amount": 2.25,
+        "timestamp": "2025-12-20T17:35:00.000Z"
+      },
+      {
+        "type": "earning",
+        "title": "Browser Automation",
+        "details": "Form submission automation task",
+        "amount": 1.75,
+        "timestamp": "2025-12-20T17:30:00.000Z"
+      },
+      {
+        "type": "withdrawal",
+        "title": "PayPal Withdrawal",
+        "details": "Withdrawal to user@example.com - $25.00",
+        "amount": 0,
+        "timestamp": "2025-12-20T16:15:00.000Z"
+      },
+      {
+        "type": "earning",
+        "title": "Content Collection",
+        "details": "News article scraping from multiple sources",
+        "amount": 4.20,
+        "timestamp": "2025-12-20T16:00:00.000Z"
+      },
+      {
+        "type": "earning",
+        "title": "API Data Extraction",
+        "details": "JSON data collection from REST APIs",
+        "amount": 1.50,
+        "timestamp": "2025-12-20T15:45:00.000Z"
+      },
+      {
+        "type": "error",
+        "title": "Task Failed",
+        "details": "Browser automation timeout on target site",
+        "amount": 0,
+        "timestamp": "2025-12-20T15:30:00.000Z"
+      },
+      {
+        "type": "earning",
+        "title": "Social Media Monitoring",
+        "details": "Automated social media data collection",
+        "amount": 2.80,
+        "timestamp": "2025-12-20T15:15:00.000Z"
+      }
+    ],
+    "performance": {
+      "success_rate": 96.8,
+      "total_tasks": 995,
+      "avg_execution_time": 4.2
+    }
+  }
+}

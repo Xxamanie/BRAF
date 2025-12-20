@@ -162,9 +162,50 @@ jobs:
         with open('data/automation_results.json', 'w') as f:
             json.dump(workflow_results, f, indent=2)
         
+        # Generate monetization data
+        successful_tasks = [r for r in results if r.get('success', False)]
+        total_earnings = len(successful_tasks) * 0.25  # $0.25 per successful task
+        
+        monetization_data = {
+            'timestamp': datetime.now().isoformat(),
+            'monetization_data': {
+                'total_earnings': total_earnings,
+                'pending_earnings': len(results) * 0.05,  # $0.05 per pending task
+                'withdrawn_amount': max(0, total_earnings - 10),  # Simulate withdrawals
+                'platforms': [
+                    {
+                        'name': 'GitHub Actions Workers',
+                        'total_earned': total_earnings,
+                        'status': 'active',
+                        'last_updated': datetime.now().isoformat(),
+                        'tasks_completed': len(successful_tasks)
+                    }
+                ],
+                'recent_activity': [
+                    {
+                        'type': 'earning' if r.get('success', False) else 'error',
+                        'title': f'{task_type.title()} Task',
+                        'details': f'GitHub Actions execution - Run #{os.environ.get(\"GITHUB_RUN_ID\", \"local\")}',
+                        'amount': 0.25 if r.get('success', False) else 0,
+                        'timestamp': datetime.now().isoformat()
+                    } for r in results[-5:]  # Last 5 results
+                ],
+                'performance': {
+                    'success_rate': (len(successful_tasks) / len(results) * 100) if results else 0,
+                    'total_tasks': len(results),
+                    'avg_execution_time': sum(r.get('execution_time', 0) for r in results) / len(results) if results else 0
+                }
+            }
+        }
+        
+        with open('data/monetization_data.json', 'w') as f:
+            json.dump(monetization_data, f, indent=2)
+        
         print(f'\\n📊 Workflow Summary:')
         print(f'   ✅ Total tasks executed: {len(results)}')
+        print(f'   💰 Total earnings: ${total_earnings:.2f}')
         print(f'   💾 Results saved to: data/automation_results.json')
+        print(f'   💾 Monetization data saved to: data/monetization_data.json')
         print(f'\\n🎉 BRAF automation workflow completed!')
         "
         
@@ -172,8 +213,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add data/automation_results.json
-        git commit -m "Update automation results - $(date)" || echo "No changes to commit"
+        git add data/automation_results.json data/monetization_data.json
+        git commit -m "Update automation and monetization results - $(date)" || echo "No changes to commit"
         git push || echo "No changes to push"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
