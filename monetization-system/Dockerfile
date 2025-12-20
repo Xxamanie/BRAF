@@ -1,23 +1,31 @@
+# Use official Python slim image
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+# Set working directory
+WORKDIR /usr/src/app
 
-WORKDIR /app
-
-# System deps needed by common libs
-RUN apt-get update && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    build-essential \
     gcc \
-    libffi-dev \
-    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+# Copy requirements
+COPY requirements.txt ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Create virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy app code
 COPY . .
 
+# Expose port
 EXPOSE 8080
 
-CMD ["python", "app.py"]
+# Start the app
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:8080"]
