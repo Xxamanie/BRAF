@@ -1,0 +1,16 @@
+[Unit]
+Description=BRAF Celery Worker
+After=network.target postgresql.service redis.service rabbitmq-server.service
+
+[Service]
+Type=exec
+User=braf
+Group=braf
+WorkingDirectory=/opt/braf
+Environment=PATH=/opt/braf/venv/bin
+ExecStart=/opt/braf/venv/bin/celery -A worker worker --loglevel=info
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

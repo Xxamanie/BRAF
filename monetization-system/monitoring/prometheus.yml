@@ -1,0 +1,79 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'braf-worker-monitor'
+    environment: 'production'
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+    scrape_interval: 15s
+
+  # BRAF Worker main application
+  - job_name: "braf-worker"
+    static_configs:
+      - targets: ["braf_worker:8000"]
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # BRAF C2 Server
+  - job_name: "braf-c2"
+    static_configs:
+      - targets: ["braf_c2:8001"]
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # PostgreSQL database metrics
+  - job_name: "postgres"
+    static_configs:
+      - targets: ["postgres:5432"]
+    scrape_interval: 30s
+
+  # Redis cache metrics
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis:6379"]
+    scrape_interval: 30s
+
+  # Celery worker metrics
+  - job_name: "celery-worker"
+    static_configs:
+      - targets: ["celery_worker:8000"]
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+  # Flower Celery monitoring
+  - job_name: "flower"
+    static_configs:
+      - targets: ["flower:5555"]
+    metrics_path: /metrics
+    scrape_interval: 60s
+
+  # Node exporter for system metrics (if available)
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+    scrape_interval: 30s
+
+  # Nginx metrics (if available)
+  - job_name: "nginx"
+    static_configs:
+      - targets: ["nginx:9113"]
+    metrics_path: /metrics
+    scrape_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - "alertmanager:9093"
+      scheme: http
+      timeout: 10s
+      api_version: v1

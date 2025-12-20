@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAF - Withdrawals</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .nav {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .balance-amount {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .withdrawal-form {
+            display: grid;
+            gap: 20px;
+            max-width: 500px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .withdrawal-history {
+            margin-top: 30px;
+        }
+        
+        .withdrawal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .withdrawal-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Withdrawal Management</h1>
+            <p>Request withdrawals and view transaction history</p>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/automations">Automations</a>
+                <a href="/withdrawals" class="active">Withdrawals</a>
+                <a href="/profile">Profile</a>
+            </div>
+            <div>
+                <a href="/login" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="balance-card">
+            <div class="balance-amount" id="availableBalance">$0.00</div>
+            <div>Available Balance</div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Request Withdrawal</h3>
+                </div>
+                <div class="card-body">
+                    <form id="withdrawalForm" class="withdrawal-form">
+                        <div class="form-group">
+                            <label for="amount">Amount (USD)</label>
+                            <input type="number" id="amount" name="amount" min="10" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="provider">Withdrawal Method</label>
+                            <select id="provider" name="provider" required>
+                                <option value="">Select method...</option>
+                                <option value="opay">OPay (Mobile Money)</option>
+                                <option value="palmpay">PalmPay (Mobile Money)</option>
+                                <option value="crypto">Cryptocurrency</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="recipient">Recipient Address/Phone</label>
+                            <input type="text" id="recipient" name="recipient" placeholder="Phone number or wallet address" required>
+                        </div>
+                        
+                        <div class="form-group" id="networkGroup" style="display: none;">
+                            <label for="network">Network (for crypto)</label>
+                            <select id="network" name="network">
+                                <option value="TRC20">TRC20 (USDT)</option>
+                                <option value="ERC20">ERC20 (USDT)</option>
+                                <option value="BTC">Bitcoin</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn">Request Withdrawal</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3>Withdrawal History</h3>
+                </div>
+                <div class="card-body">
+                    <div id="withdrawalHistory">
+                        <!-- Withdrawal history will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load data on page load
+        window.addEventListener('load', function() {
+            loadBalance();
+            loadWithdrawalHistory();
+        });
+        
+        // Show/hide network field based on provider
+        document.getElementById('provider').addEventListener('change', function() {
+            const networkGroup = document.getElementById('networkGroup');
+            if (this.value === 'crypto') {
+                networkGroup.style.display = 'block';
+            } else {
+                networkGroup.style.display = 'none';
+            }
+        });
+        
+        // Handle withdrawal form submission
+        document.getElementById('withdrawalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            const enterpriseId = localStorage.getItem('braf_enterprise_id');
+            const sessionToken = localStorage.getItem('braf_session');
+            
+            if (!enterpriseId || !sessionToken) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v1/withdrawal/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`
+                    },
+                    body: JSON.stringify({
+                        ...data,
+                        enterprise_id: enterpriseId
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Withdrawal request submitted successfully!');
+                    this.reset();
+                    loadBalance();
+                    loadWithdrawalHistory();
+                } else {
+                    const error = await response.json();
+                    alert(`Withdrawal failed: ${error.detail}`);
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        });
+        
+        async function loadBalance() {
+            const enterpriseId = localStorage.getItem('braf_enterprise_id');
+            const sessionToken = localStorage.getItem('braf_session');
+            
+            try {
+                const response = await fetch(`/api/v1/enterprise/profile/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('availableBalance').textContent = 
+                        `$${data.statistics.available_balance.toFixed(2)}`;
+                }
+            } catch (error) {
+                console.error('Failed to load balance:', error);
+            }
+        }
+        
+        async function loadWithdrawalHistory() {
+            const enterpriseId = localStorage.getItem('braf_enterprise_id');
+            const sessionToken = localStorage.getItem('braf_session');
+            
+            try {
+                const response = await fetch(`/api/v1/withdrawal/history/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayWithdrawalHistory(data.withdrawals || []);
+                } else {
+                    document.getElementById('withdrawalHistory').innerHTML = '<p>No withdrawal history</p>';
+                }
+            } catch (error) {
+                document.getElementById('withdrawalHistory').innerHTML = '<p>Error loading history</p>';
+            }
+        }
+        
+        function displayWithdrawalHistory(withdrawals) {
+            const historyDiv = document.getElementById('withdrawalHistory');
+            
+            if (withdrawals.length === 0) {
+                historyDiv.innerHTML = '<p style="text-align: center; color: #666;">No withdrawals yet</p>';
+                return;
+            }
+            
+            historyDiv.innerHTML = withdrawals.map(withdrawal => `
+                <div class="withdrawal-item">
+                    <div>
+                        <div><strong>$${withdrawal.amount.toFixed(2)}</strong> via ${withdrawal.provider}</div>
+                        <div style="font-size: 14px; color: #666;">${new Date(withdrawal.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <span class="status-badge status-${withdrawal.status}">${withdrawal.status}</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

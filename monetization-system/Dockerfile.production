@@ -1,0 +1,177 @@
+# Multi-stage build for production BRAF Cryptocurrency System
+# Optimized for real crypto operations with NOWPayments integration
+
+# Stage 1: Dependencies Builder
+FROM python:3.11-slim as builder
+
+WORKDIR /app
+
+# Install comprehensive system dependencies for BRAF cryptocurrency system
+RUN apt-get update && apt-get install -y \
+    # Core build tools
+    wget \
+    gnupg \
+    gcc \
+    g++ \
+    curl \
+    build-essential \
+    make \
+    cmake \
+    # Python development dependencies
+    python3-dev \
+    python3-pip \
+    python3-setuptools \
+    python3-wheel \
+    # Cryptography and security libraries
+    libssl-dev \
+    libffi-dev \
+    libcrypto++-dev \
+    # Database connectivity
+    libpq-dev \
+    postgresql-client \
+    # Image processing (for CAPTCHA solving)
+    libjpeg-dev \
+    libpng-dev \
+    libwebp-dev \
+    # XML/HTML processing
+    libxml2-dev \
+    libxslt1-dev \
+    # Compression libraries
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    # Network and HTTP libraries
+    libcurl4-openssl-dev \
+    # Git for version control
+    git \
+    # System utilities
+    unzip \
+    software-properties-common \
+    apt-transport-https \
+    ca-certificates \
+    lsb-release \
+    # Clean up to reduce image size
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Install Node.js for Playwright
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Copy and install Python dependencies
+COPY requirements-live.txt requirements.txt ./
+RUN pip install --no-cache-dir --user -r requirements-live.txt
+
+# Stage 2: Playwright Setup
+FROM mcr.microsoft.com/playwright/python:v1.40.0-focal as playwright
+
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+# Install Playwright browsers (optimized for production)
+RUN playwright install chromium firefox webkit \
+    && playwright install-deps chromium firefox webkit
+
+# Clean up to reduce image size
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/*
+
+# Stage 3: Production Image
+FROM python:3.11-slim
+
+LABEL maintainer="BRAF Cryptocurrency System"
+LABEL description="Production-ready BRAF with real cryptocurrency integration"
+LABEL version="1.0.0"
+
+WORKDIR /app
+
+# Install runtime dependencies for browser automation and crypto operations
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    wget \
+    xdg-utils \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy from previous stages
+COPY --from=playwright /ms-playwright /ms-playwright
+COPY --from=builder /root/.local /root/.local
+
+# Copy application code
+COPY . .
+
+# Environment variables for production
+ENV PATH=/root/.local/bin:$PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV ENVIRONMENT=production
+
+# NOWPayments configuration
+ENV NOWPAYMENTS_API_KEY=RD7WEXF-QTW4N7P-HMV12F9-MPANF4G
+ENV NOWPAYMENTS_BASE_URL=https://api.nowpayments.io/v1
+ENV NOWPAYMENTS_SANDBOX=false
+
+# Database configuration
+ENV DATABASE_ID=cec3b6d4-14c6-4256-9225-a30f14bfcb2c
+ENV CLOUDFLARE_API_KEY=c40ef9c9bf82658bb72b21fd80944dac
+
+# Create non-root user for security
+RUN useradd -m -u 1000 braf_user
+RUN chown -R braf_user:braf_user /app
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data /app/uploads \
+    && chown -R braf_user:braf_user /app/logs /app/data /app/uploads
+
+# Switch to non-root user
+USER braf_user
+
+# Health check for cryptocurrency system
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; r = requests.get('http://localhost:8000/api/crypto/webhook/test', timeout=5); exit(0 if r.status_code == 200 else 1)"
+
+# Expose port
+EXPOSE 8000
+
+# Production startup command with cryptocurrency support
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120", "--keep-alive", "2", "--max-requests", "1000", "--max-requests-jitter", "100", "main:app"]

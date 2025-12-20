@@ -1,0 +1,18 @@
+{
+  "name": "quiter",
+  "version": "1.0.0",
+  "description": "A distributed system for ethical web automation, research, and testing with advanced detection evasion and behavioral emulation capabilities.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.3"
+  }
+}

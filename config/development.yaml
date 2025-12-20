@@ -1,0 +1,27 @@
+browser:
+  headless: true
+  instance_timeout: 300
+  max_instances: 5
+captcha:
+  fallback_ocr: true
+  primary_service: 2captcha
+  test_mode: true
+database:
+  echo: true
+  pool_size: 5
+  url: postgresql://braf:braf_dev_password@localhost:5432/braf_dev
+logging:
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  level: DEBUG
+monitoring:
+  enable_metrics: true
+  prometheus_port: 8000
+redis:
+  url: redis://localhost:6379/0
+security:
+  secret_key: dev_secret_key_change_in_production
+  use_vault: false
+worker:
+  health_check_interval: 60
+  heartbeat_interval: 30
+  max_concurrent_tasks: 2

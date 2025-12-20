@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAF Monetization Dashboard - Enhanced</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .card-header h3 {
+            color: #333;
+            font-size: 18px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .automation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .automation-item:last-child {
+            border-bottom: none;
+        }
+        
+        .automation-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .automation-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .earnings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .earnings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .earnings-amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .earnings-platform {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .alert.show {
+            transform: translateX(0);
+        }
+        
+        .alert-success {
+            background: #28a745;
+        }
+        
+        .alert-danger {
+            background: #dc3545;
+        }
+        
+        .alert-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .alert-info {
+            background: #17a2b8;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .operations-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .operations-table th,
+        .operations-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .operations-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .system-health {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .health-metric {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .health-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .health-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .action-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .action-btn.success {
+            background: #28a745;
+        }
+        
+        .action-btn.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .action-btn.danger {
+            background: #dc3545;
+        }
+        
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #28a745;
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .nav {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>BRAF Monetization Dashboard</h1>
+            <p>Manage your browser automation revenue streams</p>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="#" onclick="loadAutomations()">Automations</a>
+                <a href="#" onclick="loadWithdrawals()">Withdrawals</a>
+                <a href="#" onclick="loadProfile()">Profile</a>
+            </div>
+            <div>
+                <a href="/login" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading dashboard data...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="dashboard-content" style="display: none;">
+            <!-- Real-time indicator -->
+            <div style="text-align: right; margin-bottom: 20px;">
+                <span class="real-time-indicator">
+                    <span class="pulse"></span>
+                    Live Data
+                </span>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalEarnings">$0.00</div>
+                    <div class="stat-label">Total Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="availableBalance">$0.00</div>
+                    <div class="stat-label">Available Balance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activeOperations">0</div>
+                    <div class="stat-label">Active Operations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="successRate">0%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="subscriptionTier" style="color: #28a745;">Free Beta</div>
+                    <div class="stat-label">Access Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingPayouts">$0.00</div>
+                    <div class="stat-label">Pending Payouts</div>
+                </div>
+            </div>
+            
+            <!-- System Health -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>System Health</h3>
+                </div>
+                <div class="card-body">
+                    <div class="system-health">
+                        <div class="health-metric">
+                            <div class="health-value" id="cpuUsage">0%</div>
+                            <div class="health-label">CPU Usage</div>
+                        </div>
+                        <div class="health-metric">
+                            <div class="health-value" id="memoryUsage">0%</div>
+                            <div class="health-label">Memory Usage</div>
+                        </div>
+                        <div class="health-metric">
+                            <div class="health-value" id="networkUsage">0%</div>
+                            <div class="health-label">Network Usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Charts -->
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Earnings Analytics</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="earningsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Platform Distribution</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="platformChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Operations -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Active Operations</h3>
+                </div>
+                <div class="card-body">
+                    <table class="operations-table" id="operationsTable">
+                        <thead>
+                            <tr>
+                                <th>Operation ID</th>
+                                <th>Type</th>
+                                <th>Platform</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                                <th>Earnings</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationsTableBody">
+                            <!-- Operations will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Earnings</h3>
+                    </div>
+                    <div class="card-body" id="earnings-list">
+                        <!-- Earnings will be loaded here -->
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>System Alerts</h3>
+                    </div>
+                    <div class="card-body" id="alerts-list">
+                        <!-- Alerts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button onclick="createAutomation()" class="action-btn">
+                    ➕ Create Automation
+                </button>
+                <button onclick="requestWithdrawal()" class="action-btn secondary">
+                    💰 Request Withdrawal
+                </button>
+                <button onclick="runResearch()" class="action-btn success">
+                    🔬 Run Research
+                </button>
+                <button onclick="optimizeSystem()" class="action-btn warning">
+                    ⚡ Optimize System
+                </button>
+                <button onclick="viewAnalytics()" class="action-btn">
+                    📊 View Analytics
+                </button>
+                <button onclick="emergencyStop()" class="action-btn danger">
+                    🛑 Emergency Stop
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operation Details Modal -->
+    <div id="operationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Operation Details</h2>
+            <div id="operationDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        let enterpriseId = null;
+        let sessionToken = null;
+        let refreshInterval = null;
+        let earningsChart = null;
+        let platformChart = null;
+        
+        // Load dashboard data on page load
+        window.addEventListener('load', function() {
+            // Get session data from localStorage
+            sessionToken = localStorage.getItem('braf_session');
+            enterpriseId = localStorage.getItem('braf_enterprise_id');
+            
+            if (!sessionToken || !enterpriseId) {
+                // Redirect to login if no session
+                window.location.href = '/login';
+                return;
+            }
+            
+            loadDashboard();
+            initializeCharts();
+            startRealTimeUpdates();
+        });
+        
+        async function loadDashboard() {
+            try {
+                showLoading(true);
+                
+                // Load real-time dashboard data
+                const response = await fetch(`/api/v1/dashboard/realtime/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update dashboard
+                updateDashboard(data);
+                showLoading(false);
+                
+            } catch (error) {
+                console.error('Dashboard load error:', error);
+                showError(`Failed to load dashboard: ${error.message}`);
+                showLoading(false);
+            }
+        }
+        
+        function startRealTimeUpdates() {
+            // Update every 5 seconds
+            refreshInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/v1/dashboard/realtime/${enterpriseId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${sessionToken}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateDashboard(data, false); // Don't show loading for updates
+                    }
+                } catch (error) {
+                    console.error('Real-time update error:', error);
+                }
+            }, 5000);
+        }
+        
+        function stopRealTimeUpdates() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+        
+        function updateDashboard(data) {
+            const { enterprise, statistics, subscription } = data;
+            
+            // Update stats
+            document.getElementById('totalEarnings').textContent = `$${statistics.total_earnings.toFixed(2)}`;
+            document.getElementById('availableBalance').textContent = `$${statistics.available_balance.toFixed(2)}`;
+            document.getElementById('activeAutomations').textContent = statistics.active_automations;
+            
+            // Show free beta status
+            const tierElement = document.getElementById('subscriptionTier');
+            if (subscription.tier === 'free') {
+                tierElement.textContent = 'Free Beta';
+                tierElement.style.color = '#28a745';
+            } else {
+                tierElement.textContent = subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1);
+            }
+            
+            // Load automations and earnings
+            loadAutomationsList();
+            loadEarningsList();
+            
+            document.getElementById('dashboard-content').style.display = 'block';
+        }
+        
+        async function loadAutomationsList() {
+            try {
+                const response = await fetch(`/api/v1/automation/list/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const automationsList = document.getElementById('automations-list');
+                    
+                    if (data.automations && data.automations.length > 0) {
+                        automationsList.innerHTML = data.automations.map(automation => `
+                            <div class="automation-item">
+                                <div class="automation-info">
+                                    <h4>${automation.template_type.charAt(0).toUpperCase() + automation.template_type.slice(1)} - ${automation.platform}</h4>
+                                    <p>Earnings: $${automation.earnings_total.toFixed(2)} | Success Rate: ${(automation.success_rate * 100).toFixed(1)}%</p>
+                                </div>
+                                <span class="status-badge status-${automation.status}">${automation.status}</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        automationsList.innerHTML = '<p style="text-align: center; color: #666;">No automations found. <a href="#" onclick="createAutomation()">Create your first automation</a></p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load automations:', error);
+            }
+        }
+        
+        async function loadEarningsList() {
+            try {
+                const response = await fetch(`/api/v1/dashboard/earnings/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const earningsList = document.getElementById('earnings-list');
+                    
+                    if (data.recent_earnings && data.recent_earnings.length > 0) {
+                        earningsList.innerHTML = data.recent_earnings.map(earning => `
+                            <div class="earnings-item">
+                                <div>
+                                    <div class="earnings-platform">${earning.platform} - ${earning.task_type}</div>
+                                    <div style="font-size: 12px; color: #999;">${new Date(earning.earned_at).toLocaleDateString()}</div>
+                                </div>
+                                <div class="earnings-amount">+$${earning.amount.toFixed(2)}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        earningsList.innerHTML = '<p style="text-align: center; color: #666;">No earnings yet</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load earnings:', error);
+            }
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function createAutomation() {
+            window.location.href = '/create-automation';
+        }
+        
+        function requestWithdrawal() {
+            window.location.href = '/request-withdrawal';
+        }
+        
+        function loadAutomations() {
+            window.location.href = '/automations';
+        }
+        
+        function loadWithdrawals() {
+            window.location.href = '/withdrawals';
+        }
+        
+        function loadProfile() {
+            window.location.href = '/profile';
+        }
+    </script>
+</body>
+</html>

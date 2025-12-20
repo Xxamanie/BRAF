@@ -1,0 +1,96 @@
+networks:
+  braf_network:
+    driver: bridge
+services:
+  c2_server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.c2
+    depends_on:
+    - postgres
+    - redis
+    environment:
+      BRAF_ENV: development
+      DATABASE_URL: postgresql://braf:braf_dev_password@postgres:5432/braf_dev
+      LOG_LEVEL: DEBUG
+      REDIS_URL: redis://redis:6379/0
+    networks:
+    - braf_network
+    ports:
+    - 8000:8000
+    - 50051:50051
+    - 8765:8765
+    volumes:
+    - ./config:/app/config
+    - ./logs:/app/logs
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    image: grafana/grafana:latest
+    networks:
+    - braf_network
+    ports:
+    - 3000:3000
+    volumes:
+    - grafana_data:/var/lib/grafana
+    - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+  postgres:
+    environment:
+      POSTGRES_DB: braf_dev
+      POSTGRES_PASSWORD: braf_dev_password
+      POSTGRES_USER: braf
+    image: postgres:15
+    networks:
+    - braf_network
+    ports:
+    - 5432:5432
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+  prometheus:
+    command:
+    - --config.file=/etc/prometheus/prometheus.yml
+    - --storage.tsdb.path=/prometheus
+    - --web.console.libraries=/etc/prometheus/console_libraries
+    - --web.console.templates=/etc/prometheus/consoles
+    - --web.enable-lifecycle
+    image: prom/prometheus:latest
+    networks:
+    - braf_network
+    ports:
+    - 9090:9090
+    volumes:
+    - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    - prometheus_data:/prometheus
+  redis:
+    image: redis:7-alpine
+    networks:
+    - braf_network
+    ports:
+    - 6379:6379
+    volumes:
+    - redis_data:/data
+  worker_node:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    depends_on:
+    - c2_server
+    environment:
+      BRAF_ENV: development
+      C2_ENDPOINT: http://c2_server:8000
+      MAX_CONCURRENT_TASKS: '2'
+      WORKER_ID: dev_worker_1
+    networks:
+    - braf_network
+    scale: 2
+    volumes:
+    - ./config:/app/config
+    - ./logs:/app/logs
+version: '3.8'
+volumes:
+  grafana_data: {}
+  postgres_data: {}
+  prometheus_data: {}
+  redis_data: {}

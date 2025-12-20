@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BRAF Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+        
+        #out {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+        
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #d73a49;
+            background: #ffeef0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #d73a49;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007acc;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>BRAF Results</h1>
+    
+    <div class="stats" id="stats" style="display: none;">
+        <div class="stat-card">
+            <div class="stat-value" id="total-count">-</div>
+            <div class="stat-label">Total Targets</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="success-count">-</div>
+            <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="success-rate">-</div>
+            <div class="stat-label">Success Rate</div>
+        </div>
+    </div>
+    
+    <pre id="out" class="loading">Loading BRAF results...</pre>
+    
+    <script>
+        async function loadResults() {
+            try {
+                // Try enhanced results first, then fallback to basic results
+                let response;
+                try {
+                    response = await fetch("../data/enhanced_results.json");
+                    if (!response.ok) throw new Error('Enhanced results not found');
+                } catch (e) {
+                    response = await fetch("../data/results.json");
+                    if (!response.ok) throw new Error('Basic results not found');
+                }
+                
+                const data = await response.json();
+                
+                // Display formatted JSON
+                document.getElementById("out").textContent = JSON.stringify(data, null, 2);
+                document.getElementById("out").className = "";
+                
+                // Extract and display statistics
+                let results, stats;
+                
+                if (data.enhanced_braf_execution) {
+                    // Enhanced BRAF format
+                    results = data.results || [];
+                    stats = data.enhanced_braf_execution.statistics || {};
+                } else if (data.github_actions_execution) {
+                    // GitHub Actions format
+                    results = data.results || [];
+                    stats = {
+                        total_targets: data.github_actions_execution.targets_processed,
+                        successful: results.filter(r => r.success).length
+                    };
+                } else {
+                    // Basic format
+                    results = data.results || data || [];
+                    stats = {
+                        total_targets: results.length,
+                        successful: results.filter(r => r.success).length
+                    };
+                }
+                
+                // Update statistics
+                const totalTargets = stats.total_targets || results.length;
+                const successful = stats.successful || results.filter(r => r.success).length;
+                const successRate = totalTargets > 0 ? ((successful / totalTargets) * 100).toFixed(1) : 0;
+                
+                document.getElementById("total-count").textContent = totalTargets;
+                document.getElementById("success-count").textContent = successful;
+                document.getElementById("success-rate").textContent = successRate + "%";
+                document.getElementById("stats").style.display = "grid";
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+                document.getElementById("out").innerHTML = `<div class="error">
+                    <strong>Error loading results:</strong><br>
+                    ${error.message}<br><br>
+                    <em>Make sure the BRAF scraper has run and generated results files.</em>
+                </div>`;
+                document.getElementById("out").className = "";
+            }
+        }
+        
+        // Load results when page loads
+        loadResults();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadResults, 30000);
+    </script>
+</body>
+</html>

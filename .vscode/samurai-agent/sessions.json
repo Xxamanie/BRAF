@@ -1,0 +1,28 @@
+[
+  {
+    "id": "b6c8db4f-4ec1-4ba3-b4e9-59c18954363c",
+    "title": "New Conversation",
+    "status": "active",
+    "messageCount": 17,
+    "totalTokens": 0,
+    "totalCost": 0,
+    "lastMessageAt": "2025-12-20T16:12:43.998Z",
+    "tags": [],
+    "metadata": {
+      "projectId": "default-project",
+      "model": "gemini-2.5-flash-free-tier",
+      "mode": "debugging",
+      "connectedCodebasePath": "c:\\Users\\sirjv\\Quiter"
+    },
+    "codeContextIds": [],
+    "previous_session_intent": "pure_discussion",
+    "pinnedFilePaths": [],
+    "createdAt": "2025-12-17T11:36:24.770Z",
+    "updatedAt": "2025-12-20T16:12:44.001Z",
+    "currentArtifact": {
+      "mermaidData": "flowchart TD\nclassDef ui fill:#E2E8F0,stroke:#475569,color:#111827,stroke-width:1px;\nclassDef api fill:#E0E7FF,stroke:#4338CA,color:#111827,stroke-width:1px;\nclassDef data fill:#E0F2F1,stroke:#0F766E,color:#111827,stroke-width:1px;\nclassDef auth fill:#F1F5F9,stroke:#334155,color:#111827,stroke-width:1px;\nclassDef infra fill:#F3F4F6,stroke:#4B5563,color:#111827,stroke-width:1px;\nlinkStyle default stroke:#94a3b8,color:#334155;\n\nmethod_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main[\"run_main\"]\nmethod_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main -->|calls| method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+      "timestamp": 1766231164234,
+      "generationStatus": "analyzing"
+    }
+  }
+]

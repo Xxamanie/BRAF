@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Withdrawal - BRAF</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .balance-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .balance-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .method-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .category-card {
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .category-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .category-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .method-card {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+        }
+        
+        .method-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .method-card.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .method-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .method-name {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .method-fee {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        .crypto-details {
+            margin-top: 10px;
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #e1e5e9;
+            padding-bottom: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .network-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .network-option {
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .network-option:hover {
+            border-color: #667eea;
+        }
+        
+        .network-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .fee-calculator {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .fee-row.total {
+            border-top: 2px solid #e1e5e9;
+            padding-top: 8px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .result.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        
+        .address-validator {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .address-validator.valid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .address-validator.invalid {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .qr-code img {
+            max-width: 150px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+        }
+        
+        .recent-addresses {
+            margin-top: 15px;
+        }
+        
+        .address-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .address-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .address-label {
+            font-weight: 500;
+            font-size: 12px;
+        }
+        
+        .address-value {
+            font-family: monospace;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .method-categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .balance-breakdown {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Enhanced Withdrawal System</h1>
+            <p>Withdraw to multiple cryptocurrencies and payment methods</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Balance Overview -->
+        <div class="card balance-card">
+            <h2>Available Balance</h2>
+            <div class="balance-amount" id="availableBalance">$0.00</div>
+            <div class="balance-breakdown">
+                <div class="balance-item">
+                    <div style="font-size: 20px; font-weight: bold;" id="totalEarnings">$0.00</div>
+                    <div style="font-size: 12px;">Total Earnings</div>
+                </div>
+                <div class="balance-item">
+                    <div style="font-size: 20px; font-weight: bold;" id="pendingWithdrawals">$0.00</div>
+                    <div style="font-size: 12px;">Pending</div>
+                </div>
+                <div class="balance-item">
+                    <div style="font-size: 20px; font-weight: bold;" id="completedWithdrawals">$0.00</div>
+                    <div style="font-size: 12px;">Withdrawn</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Withdrawal Methods -->
+        <div class="card">
+            <h2>Select Withdrawal Method</h2>
+            
+            <div class="method-categories">
+                <!-- Cryptocurrencies -->
+                <div class="category-card">
+                    <div class="category-title">🪙 Cryptocurrencies</div>
+                    <div class="method-grid">
+                        <div class="method-card" data-method="btc" data-category="crypto">
+                            <div class="method-icon">₿</div>
+                            <div class="method-name">Bitcoin</div>
+                            <div class="method-fee">Fee: ~$5-15</div>
+                            <div class="crypto-details">BTC • Secure</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="eth" data-category="crypto">
+                            <div class="method-icon">Ξ</div>
+                            <div class="method-name">Ethereum</div>
+                            <div class="method-fee">Fee: ~$2-10</div>
+                            <div class="crypto-details">ETH • Smart</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="usdt" data-category="crypto">
+                            <div class="method-icon">₮</div>
+                            <div class="method-name">Tether</div>
+                            <div class="method-fee">Fee: ~$1-5</div>
+                            <div class="crypto-details">USDT • Stable</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="usdc" data-category="crypto">
+                            <div class="method-icon">🔵</div>
+                            <div class="method-name">USD Coin</div>
+                            <div class="method-fee">Fee: ~$1-5</div>
+                            <div class="crypto-details">USDC • Stable</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="bnb" data-category="crypto">
+                            <div class="method-icon">🟡</div>
+                            <div class="method-name">Binance</div>
+                            <div class="method-fee">Fee: ~$0.50</div>
+                            <div class="crypto-details">BNB • Fast</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="ada" data-category="crypto">
+                            <div class="method-icon">🔷</div>
+                            <div class="method-name">Cardano</div>
+                            <div class="method-fee">Fee: ~$0.20</div>
+                            <div class="crypto-details">ADA • Green</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Privacy Coins -->
+                <div class="category-card">
+                    <div class="category-title">🔒 Privacy Coins</div>
+                    <div class="method-grid">
+                        <div class="method-card" data-method="xmr" data-category="privacy">
+                            <div class="method-icon">🔐</div>
+                            <div class="method-name">Monero</div>
+                            <div class="method-fee">Fee: ~$0.05</div>
+                            <div class="crypto-details">XMR • Private</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="zcash" data-category="privacy">
+                            <div class="method-icon">🛡️</div>
+                            <div class="method-name">Zcash</div>
+                            <div class="method-fee">Fee: ~$0.01</div>
+                            <div class="crypto-details">ZEC • Shield</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="dash" data-category="privacy">
+                            <div class="method-icon">💨</div>
+                            <div class="method-name">Dash</div>
+                            <div class="method-fee">Fee: ~$0.01</div>
+                            <div class="crypto-details">DASH • Fast</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fast & Cheap -->
+                <div class="category-card">
+                    <div class="category-title">⚡ Fast & Cheap</div>
+                    <div class="method-grid">
+                        <div class="method-card" data-method="ton" data-category="fast">
+                            <div class="method-icon">💎</div>
+                            <div class="method-name">TON</div>
+                            <div class="method-fee">Fee: ~$0.01</div>
+                            <div class="crypto-details">TON • Instant</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="trx" data-category="fast">
+                            <div class="method-icon">🔴</div>
+                            <div class="method-name">Tron</div>
+                            <div class="method-fee">Fee: ~$0.01</div>
+                            <div class="crypto-details">TRX • Free</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="ltc" data-category="fast">
+                            <div class="method-icon">🥈</div>
+                            <div class="method-name">Litecoin</div>
+                            <div class="method-fee">Fee: ~$0.05</div>
+                            <div class="crypto-details">LTC • Silver</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="sol" data-category="fast">
+                            <div class="method-icon">🌞</div>
+                            <div class="method-name">Solana</div>
+                            <div class="method-fee">Fee: ~$0.01</div>
+                            <div class="crypto-details">SOL • Speed</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Money -->
+                <div class="category-card">
+                    <div class="category-title">📱 Mobile Money</div>
+                    <div class="method-grid">
+                        <div class="method-card" data-method="opay" data-category="mobile">
+                            <div class="method-icon">📱</div>
+                            <div class="method-name">OPay</div>
+                            <div class="method-fee">Fee: 1.5%</div>
+                            <div class="crypto-details">NGN • Nigeria</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="palmpay" data-category="mobile">
+                            <div class="method-icon">💳</div>
+                            <div class="method-name">PalmPay</div>
+                            <div class="method-fee">Fee: 1.5%</div>
+                            <div class="crypto-details">NGN • Nigeria</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Withdrawal Form -->
+        <div class="card" id="withdrawalForm" style="display: none;">
+            <h2>Withdrawal Details</h2>
+            
+            <form id="withdrawForm">
+                <!-- Amount Section -->
+                <div class="form-section">
+                    <h3>💰 Amount</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Withdrawal Amount (USD)</label>
+                            <input type="number" id="amount" name="amount" min="10" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="percentage">Or Select Percentage</label>
+                            <select id="percentage" name="percentage">
+                                <option value="">Custom Amount</option>
+                                <option value="25">25% of Balance</option>
+                                <option value="50">50% of Balance</option>
+                                <option value="75">75% of Balance</option>
+                                <option value="100">100% of Balance</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Crypto Address Section -->
+                <div class="form-section" id="cryptoSection" style="display: none;">
+                    <h3 id="cryptoSectionTitle">🪙 Cryptocurrency Details</h3>
+                    
+                    <!-- Network Selection -->
+                    <div class="form-group" id="networkGroup" style="display: none;">
+                        <label>Select Network</label>
+                        <div class="network-selector" id="networkSelector">
+                            <!-- Networks will be populated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="walletAddress" id="addressLabel">Wallet Address</label>
+                        <input type="text" id="walletAddress" name="wallet_address" placeholder="Enter your wallet address">
+                        <div id="addressValidator" class="address-validator" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memo">Memo/Tag (Optional)</label>
+                        <input type="text" id="memo" name="memo" placeholder="Optional memo or destination tag">
+                    </div>
+                    
+                    <!-- Recent Addresses -->
+                    <div class="recent-addresses" id="recentAddresses" style="display: none;">
+                        <label>Recent Addresses</label>
+                        <div id="addressList">
+                            <!-- Recent addresses will be populated -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Money Section -->
+                <div class="form-section" id="mobileSection" style="display: none;">
+                    <h3>📱 Mobile Money Details</h3>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phone_number" placeholder="+234XXXXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label for="accountName">Account Name</label>
+                        <input type="text" id="accountName" name="account_name" placeholder="Account holder name">
+                    </div>
+                </div>
+                
+                <!-- Fee Calculator -->
+                <div class="fee-calculator" id="feeCalculator" style="display: none;">
+                    <h4>💳 Transaction Summary</h4>
+                    <div class="fee-row">
+                        <span>Withdrawal Amount:</span>
+                        <span id="withdrawAmount">$0.00</span>
+                    </div>
+                    <div class="fee-row" id="conversionRow" style="display: none;">
+                        <span>Converted Amount:</span>
+                        <span id="convertedAmount">0.00</span>
+                    </div>
+                    <div class="fee-row" id="exchangeRateRow" style="display: none;">
+                        <span>Exchange Rate:</span>
+                        <span id="exchangeRate">1 USD = 0.00</span>
+                    </div>
+                    <div class="fee-row">
+                        <span>Network/Processing Fee:</span>
+                        <span id="feeAmount">$0.00</span>
+                    </div>
+                    <div class="fee-row total">
+                        <span>You'll Receive:</span>
+                        <span id="netAmount">$0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn" id="submitBtn">Process Withdrawal</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+            
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedMethod = null;
+        let selectedNetwork = null;
+        let availableBalance = 0;
+        let enterpriseId = 1; // Default for demo
+        
+        // Cryptocurrency configurations
+        const cryptoConfig = {
+            btc: {
+                name: 'Bitcoin',
+                symbol: 'BTC',
+                networks: ['Bitcoin'],
+                addressRegex: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/,
+                fee: 15.00
+            },
+            eth: {
+                name: 'Ethereum',
+                symbol: 'ETH',
+                networks: ['Ethereum'],
+                addressRegex: /^0x[a-fA-F0-9]{40}$/,
+                fee: 5.00
+            },
+            usdt: {
+                name: 'Tether',
+                symbol: 'USDT',
+                networks: ['ERC20', 'TRC20', 'BEP20'],
+                addressRegex: {
+                    'ERC20': /^0x[a-fA-F0-9]{40}$/,
+                    'TRC20': /^T[A-Za-z1-9]{33}$/,
+                    'BEP20': /^0x[a-fA-F0-9]{40}$/
+                },
+                fee: { 'ERC20': 5.00, 'TRC20': 1.00, 'BEP20': 1.00 }
+            },
+            usdc: {
+                name: 'USD Coin',
+                symbol: 'USDC',
+                networks: ['ERC20', 'BEP20', 'Polygon'],
+                addressRegex: {
+                    'ERC20': /^0x[a-fA-F0-9]{40}$/,
+                    'BEP20': /^0x[a-fA-F0-9]{40}$/,
+                    'Polygon': /^0x[a-fA-F0-9]{40}$/
+                },
+                fee: { 'ERC20': 5.00, 'BEP20': 1.00, 'Polygon': 0.10 }
+            },
+            bnb: {
+                name: 'Binance Coin',
+                symbol: 'BNB',
+                networks: ['BEP20'],
+                addressRegex: /^0x[a-fA-F0-9]{40}$/,
+                fee: 0.50
+            },
+            ada: {
+                name: 'Cardano',
+                symbol: 'ADA',
+                networks: ['Cardano'],
+                addressRegex: /^addr1[a-z0-9]{98}$/,
+                fee: 0.20
+            },
+            xmr: {
+                name: 'Monero',
+                symbol: 'XMR',
+                networks: ['Monero'],
+                addressRegex: /^4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}$/,
+                fee: 0.05
+            },
+            zcash: {
+                name: 'Zcash',
+                symbol: 'ZEC',
+                networks: ['Zcash'],
+                addressRegex: /^t1[a-zA-Z0-9]{33}$|^zs1[a-z0-9]{75}$/,
+                fee: 0.01
+            },
+            dash: {
+                name: 'Dash',
+                symbol: 'DASH',
+                networks: ['Dash'],
+                addressRegex: /^X[1-9A-HJ-NP-Za-km-z]{33}$/,
+                fee: 0.01
+            },
+            ton: {
+                name: 'TON Coin',
+                symbol: 'TON',
+                networks: ['TON'],
+                addressRegex: /^[UE]Q[A-Za-z0-9_-]{46}$/,
+                fee: 0.01
+            },
+            trx: {
+                name: 'Tron',
+                symbol: 'TRX',
+                networks: ['Tron'],
+                addressRegex: /^T[A-Za-z1-9]{33}$/,
+                fee: 0.01
+            },
+            ltc: {
+                name: 'Litecoin',
+                symbol: 'LTC',
+                networks: ['Litecoin'],
+                addressRegex: /^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$/,
+                fee: 0.05
+            },
+            sol: {
+                name: 'Solana',
+                symbol: 'SOL',
+                networks: ['Solana'],
+                addressRegex: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+                fee: 0.01
+            }
+        };
+        
+        // Initialize
+        window.addEventListener('load', function() {
+            loadBalance();
+            setupEventListeners();
+        });
+        
+        async function loadBalance() {
+            try {
+                // Simulate balance loading
+                availableBalance = 15234.50;
+                document.getElementById('availableBalance').textContent = `$${availableBalance.toFixed(2)}`;
+                document.getElementById('totalEarnings').textContent = `$${(availableBalance + 5000).toFixed(2)}`;
+                document.getElementById('pendingWithdrawals').textContent = `$${(2500).toFixed(2)}`;
+                document.getElementById('completedWithdrawals').textContent = `$${(12750).toFixed(2)}`;
+            } catch (error) {
+                console.error('Failed to load balance:', error);
+            }
+        }
+        
+        function setupEventListeners() {
+            // Method selection
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    selectMethod(this.dataset.method, this.dataset.category);
+                });
+            });
+            
+            // Amount input
+            document.getElementById('amount').addEventListener('input', updateFeeCalculation);
+            document.getElementById('percentage').addEventListener('change', function() {
+                if (this.value) {
+                    const percentage = parseFloat(this.value);
+                    const amount = (availableBalance * percentage / 100).toFixed(2);
+                    document.getElementById('amount').value = amount;
+                    updateFeeCalculation();
+                }
+            });
+            
+            // Address validation
+            document.getElementById('walletAddress').addEventListener('input', validateAddress);
+            
+            // Form submission
+            document.getElementById('withdrawForm').addEventListener('submit', handleSubmit);
+        }
+        
+        function selectMethod(method, category) {
+            // Remove previous selection
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+            
+            // Select new method
+            event.target.closest('.method-card').classList.add('selected');
+            selectedMethod = method;
+            
+            // Show withdrawal form
+            document.getElementById('withdrawalForm').style.display = 'block';
+            
+            // Configure form based on method
+            if (category === 'crypto' || category === 'privacy' || category === 'fast') {
+                setupCryptoForm(method);
+            } else if (category === 'mobile') {
+                setupMobileForm(method);
+            }
+            
+            updateFeeCalculation();
+        }
+        
+        function setupCryptoForm(method) {
+            const config = cryptoConfig[method];
+            
+            document.getElementById('cryptoSection').style.display = 'block';
+            document.getElementById('mobileSection').style.display = 'none';
+            document.getElementById('cryptoSectionTitle').textContent = `🪙 ${config.name} (${config.symbol}) Details`;
+            document.getElementById('addressLabel').textContent = `${config.name} Address`;
+            
+            // Setup networks if multiple available
+            if (Array.isArray(config.networks) && config.networks.length > 1) {
+                document.getElementById('networkGroup').style.display = 'block';
+                const networkSelector = document.getElementById('networkSelector');
+                networkSelector.innerHTML = '';
+                
+                config.networks.forEach(network => {
+                    const networkDiv = document.createElement('div');
+                    networkDiv.className = 'network-option';
+                    networkDiv.textContent = network;
+                    networkDiv.addEventListener('click', function() {
+                        document.querySelectorAll('.network-option').forEach(n => n.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedNetwork = network;
+                        updateFeeCalculation();
+                    });
+                    networkSelector.appendChild(networkDiv);
+                });
+                
+                // Select first network by default
+                networkSelector.firstChild.classList.add('selected');
+                selectedNetwork = config.networks[0];
+            } else {
+                document.getElementById('networkGroup').style.display = 'none';
+                selectedNetwork = config.networks[0];
+            }
+        }
+        
+        function setupMobileForm(method) {
+            document.getElementById('cryptoSection').style.display = 'none';
+            document.getElementById('mobileSection').style.display = 'block';
+        }
+        
+        function validateAddress() {
+            const address = document.getElementById('walletAddress').value;
+            const validator = document.getElementById('addressValidator');
+            
+            if (!address || !selectedMethod) {
+                validator.style.display = 'none';
+                return;
+            }
+            
+            const config = cryptoConfig[selectedMethod];
+            if (!config) return;
+            
+            let isValid = false;
+            let regex = config.addressRegex;
+            
+            if (typeof regex === 'object' && selectedNetwork) {
+                regex = regex[selectedNetwork];
+            }
+            
+            if (regex) {
+                isValid = regex.test(address);
+            }
+            
+            validator.style.display = 'block';
+            if (isValid) {
+                validator.className = 'address-validator valid';
+                validator.textContent = '✅ Valid address format';
+            } else {
+                validator.className = 'address-validator invalid';
+                validator.textContent = '❌ Invalid address format';
+            }
+        }
+        
+        function updateFeeCalculation() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            
+            if (amount > 0 && selectedMethod) {
+                let fee = 0;
+                let convertedAmount = amount;
+                let currency = 'USD';
+                let exchangeRate = '';
+                
+                if (selectedMethod === 'opay' || selectedMethod === 'palmpay') {
+                    // Mobile money - convert to NGN
+                    const rate = 750; // 1 USD = 750 NGN
+                    convertedAmount = amount * rate;
+                    fee = convertedAmount * 0.015; // 1.5% fee
+                    currency = 'NGN';
+                    exchangeRate = `1 USD = ${rate} NGN`;
+                } else {
+                    // Cryptocurrency
+                    const config = cryptoConfig[selectedMethod];
+                    if (config) {
+                        if (typeof config.fee === 'object' && selectedNetwork) {
+                            fee = config.fee[selectedNetwork] || 0;
+                        } else {
+                            fee = config.fee || 0;
+                        }
+                    }
+                }
+                
+                const netAmount = convertedAmount - fee;
+                
+                // Update display
+                document.getElementById('withdrawAmount').textContent = `$${amount.toFixed(2)}`;
+                
+                if (currency === 'NGN') {
+                    document.getElementById('conversionRow').style.display = 'flex';
+                    document.getElementById('exchangeRateRow').style.display = 'flex';
+                    document.getElementById('convertedAmount').textContent = `₦${convertedAmount.toFixed(0)}`;
+                    document.getElementById('exchangeRate').textContent = exchangeRate;
+                    document.getElementById('feeAmount').textContent = `₦${fee.toFixed(0)}`;
+                    document.getElementById('netAmount').textContent = `₦${netAmount.toFixed(0)}`;
+                } else {
+                    document.getElementById('conversionRow').style.display = 'none';
+                    document.getElementById('exchangeRateRow').style.display = 'none';
+                    document.getElementById('feeAmount').textContent = `$${fee.toFixed(2)}`;
+                    document.getElementById('netAmount').textContent = `$${netAmount.toFixed(2)}`;
+                }
+                
+                document.getElementById('feeCalculator').style.display = 'block';
+            } else {
+                document.getElementById('feeCalculator').style.display = 'none';
+            }
+        }
+        
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            if (!selectedMethod) {
+                showResult('Please select a withdrawal method', 'error');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const amount = parseFloat(formData.get('amount'));
+            
+            if (amount > availableBalance) {
+                showResult('Insufficient balance', 'error');
+                return;
+            }
+            
+            if (amount < 10) {
+                showResult('Minimum withdrawal amount is $10', 'error');
+                return;
+            }
+            
+            // Validate crypto address if needed
+            if (cryptoConfig[selectedMethod]) {
+                const address = formData.get('wallet_address');
+                if (!address) {
+                    showResult('Please enter a wallet address', 'error');
+                    return;
+                }
+                
+                // Additional validation could be added here
+            }
+            
+            const withdrawalData = {
+                enterprise_id: enterpriseId,
+                amount: amount,
+                method: selectedMethod,
+                network: selectedNetwork,
+                recipient: formData.get('wallet_address') || formData.get('phone_number'),
+                memo: formData.get('memo') || '',
+                account_name: formData.get('account_name') || ''
+            };
+            
+            try {
+                document.getElementById('submitBtn').disabled = true;
+                showResult('Processing withdrawal request...', 'warning');
+                
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const transactionId = `WD_${Date.now()}_${selectedMethod.toUpperCase()}`;
+                
+                showResult(`
+                    <strong>✅ Withdrawal request submitted successfully!</strong><br><br>
+                    <strong>Transaction ID:</strong> ${transactionId}<br>
+                    <strong>Method:</strong> ${cryptoConfig[selectedMethod]?.name || selectedMethod.toUpperCase()}<br>
+                    <strong>Amount:</strong> $${amount.toFixed(2)}<br>
+                    <strong>Status:</strong> Processing<br>
+                    <strong>Estimated completion:</strong> 24-48 hours<br><br>
+                    <a href="/dashboard" style="color: #667eea; text-decoration: none;">← Back to Dashboard</a>
+                `, 'success');
+                
+                // Reset form after successful submission
+                setTimeout(() => {
+                    resetForm();
+                }, 5000);
+                
+            } catch (error) {
+                showResult('Network error. Please try again.', 'error');
+            } finally {
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('withdrawForm').reset();
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('.network-option').forEach(n => n.classList.remove('selected'));
+            document.getElementById('withdrawalForm').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            selectedMethod = null;
+            selectedNetwork = null;
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

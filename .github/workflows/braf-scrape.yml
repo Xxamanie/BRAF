@@ -1,0 +1,99 @@
+name: BRAF Scrape
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-github-actions.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg jq
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r monetization-system/requirements-github-actions.txt
+        
+    - name: Install Playwright browsers
+      run: |
+        cd monetization-system
+        python -m playwright install chromium
+        python -m playwright install-deps
+        
+    - name: Create data directory
+      run: |
+        mkdir -p monetization-system/data
+        mkdir -p monetization-system/logs
+        
+    - name: Run BRAF scraper
+      run: |
+        cd monetization-system
+        python scraper.py
+        
+    - name: Upload results as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: scrape-results-${{ github.run_number }}
+        path: |
+          monetization-system/data/
+          monetization-system/logs/
+        retention-days: 30
+        
+    - name: Commit and push results
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add monetization-system/data/results.json || echo "No results.json to add"
+        git add monetization-system/data/enhanced_results.json || echo "No enhanced_results.json to add"
+        git commit -m "🤖 Update scraped data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+        git push || echo "Nothing to push"
+        
+    - name: Create summary
+      run: |
+        cd monetization-system
+        if [ -f "data/enhanced_results.json" ]; then
+          echo "## 🚀 BRAF Scraping Results" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Results File:** enhanced_results.json" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract statistics if available
+          if command -v jq &> /dev/null; then
+            TOTAL=$(jq -r '.enhanced_braf_execution.statistics.total_targets // "N/A"' data/enhanced_results.json)
+            SUCCESSFUL=$(jq -r '.enhanced_braf_execution.statistics.successful // "N/A"' data/enhanced_results.json)
+            SUCCESS_RATE=$(jq -r '.enhanced_braf_execution.statistics.success_rate // "N/A"' data/enhanced_results.json)
+            HTTP_USED=$(jq -r '.enhanced_braf_execution.statistics.http_used // "N/A"' data/enhanced_results.json)
+            BROWSER_USED=$(jq -r '.enhanced_braf_execution.statistics.browser_used // "N/A"' data/enhanced_results.json)
+            
+            echo "**Statistics:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Total targets: $TOTAL" >> $GITHUB_STEP_SUMMARY
+            echo "- Successful: $SUCCESSFUL" >> $GITHUB_STEP_SUMMARY
+            echo "- Success rate: $SUCCESS_RATE%" >> $GITHUB_STEP_SUMMARY
+            echo "- HTTP scraper used: $HTTP_USED" >> $GITHUB_STEP_SUMMARY
+            echo "- Browser scraper used: $BROWSER_USED" >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "## ❌ BRAF Scraping Failed" >> $GITHUB_STEP_SUMMARY
+          echo "No results file found. Check logs for errors." >> $GITHUB_STEP_SUMMARY
+        fi

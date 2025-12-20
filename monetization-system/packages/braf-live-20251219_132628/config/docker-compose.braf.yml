@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: braf_postgres
+    environment:
+      POSTGRES_DB: braf_db
+      POSTGRES_USER: braf_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-braf_secure_password_2024}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U braf_user -d braf_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: braf_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-braf_redis_2024}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: braf_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: braf
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-braf_rabbit_2024}
+      RABBITMQ_DEFAULT_VHOST: braf_vhost
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # BRAF Main Application
+  braf_app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_main_app
+    environment:
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - BRAF_ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY:-braf_secret_key_change_in_production}
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./config:/app/config
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+      - "8003:8003"
+      - "8004:8004"
+    networks:
+      - braf_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # BRAF Worker Nodes
+  braf_worker_1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_worker_1
+    command: celery -A worker worker --loglevel=info --concurrency=4 --hostname=worker1@%h
+    environment:
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - WORKER_ID=worker_1
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+      - rabbitmq
+    restart: unless-stopped
+
+  braf_worker_2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_worker_2
+    command: celery -A worker worker --loglevel=info --concurrency=4 --hostname=worker2@%h
+    environment:
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - WORKER_ID=worker_2
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+      - rabbitmq
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: braf_nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: braf_prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - braf_network
+    restart: unless-stopped
+
+  # Grafana Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: braf_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-braf_grafana_2024}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - braf_network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # Flower - Celery Monitoring
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_flower
+    command: celery -A worker flower --port=5555
+    environment:
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+    ports:
+      - "5555:5555"
+    networks:
+      - braf_network
+    depends_on:
+      - rabbitmq
+      - braf_worker_1
+      - braf_worker_2
+    restart: unless-stopped
+
+networks:
+  braf_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

@@ -1,0 +1,43 @@
+{
+  "description": "BRAF GitHub Actions Scraping Targets",
+  "version": "1.0",
+  "targets": [
+    {
+      "url": "https://httpbin.org/html",
+      "description": "HTTPBin HTML test page",
+      "preferred_scraper": "http"
+    },
+    {
+      "url": "https://example.com",
+      "description": "Example domain for testing",
+      "preferred_scraper": "http"
+    },
+    {
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "description": "JSON placeholder API",
+      "preferred_scraper": "http"
+    },
+    {
+      "url": "https://news.ycombinator.com",
+      "description": "Hacker News homepage",
+      "preferred_scraper": "http"
+    },
+    {
+      "url": "https://httpbin.org/json",
+      "description": "HTTPBin JSON endpoint",
+      "preferred_scraper": "http"
+    },
+    {
+      "url": "https://httpbin.org/xml",
+      "description": "HTTPBin XML endpoint",
+      "preferred_scraper": "http"
+    }
+  ],
+  "settings": {
+    "parallel_execution": true,
+    "max_workers": 4,
+    "max_browser_workers": 2,
+    "enable_analytics": true,
+    "save_results": true
+  }
+}

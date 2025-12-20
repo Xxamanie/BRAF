@@ -1,0 +1,31 @@
+# BRAF GitHub Actions Requirements
+# Core dependencies for automated scraping
+
+# HTTP scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Browser automation
+playwright>=1.40.0
+
+# Data processing
+pandas>=2.0.0
+
+# Async support
+aiohttp>=3.8.0
+asyncio-throttle>=1.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# Logging and monitoring
+structlog>=23.1.0
+
+# Database (SQLite built-in, but for analytics)
+# No additional database requirements for GitHub Actions
+
+# Optional: For enhanced features
+numpy>=1.24.0
+scipy>=1.10.0

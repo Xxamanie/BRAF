@@ -1,0 +1,31 @@
+browser:
+  headless: true
+  instance_timeout: 600
+  max_instances: 10
+captcha:
+  api_key: ${CAPTCHA_API_KEY}
+  fallback_ocr: true
+  primary_service: 2captcha
+  test_mode: false
+database:
+  echo: false
+  pool_size: 10
+  url: ${DATABASE_URL}
+logging:
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  level: INFO
+monitoring:
+  elasticsearch_host: ${ELASTICSEARCH_HOST}
+  enable_metrics: true
+  prometheus_port: 8000
+redis:
+  url: ${REDIS_URL}
+security:
+  secret_key: ${SECRET_KEY}
+  use_vault: true
+  vault_token: ${VAULT_TOKEN}
+  vault_url: ${VAULT_URL}
+worker:
+  health_check_interval: 60
+  heartbeat_interval: 30
+  max_concurrent_tasks: 3

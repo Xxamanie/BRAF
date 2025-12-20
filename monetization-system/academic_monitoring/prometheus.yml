@@ -1,0 +1,12 @@
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'academic-research'
+    static_configs:
+      - targets: ['academic_app_1:5000', 'academic_app_2:5001', 'academic_app_3:5002']
+  
+  - job_name: 'academic-infrastructure'
+    static_configs:
+      - targets: ['postgres_research:5432', 'academic_research_cache:6379']

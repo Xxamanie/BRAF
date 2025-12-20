@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAF Dashboard - Browser Automation Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .success { color: #10b981; }
+        .warning { color: #f59e0b; }
+        .info { color: #3b82f6; }
+        .secondary { color: #6b7280; }
+
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .results-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f9fafb;
+            border-left: 4px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background: #f3f4f6;
+            transform: translateX(5px);
+        }
+
+        .result-item.success {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .result-item.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result-status {
+            font-size: 1.2rem;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .result-content {
+            flex: 1;
+        }
+
+        .result-url {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .result-meta {
+            font-size: 0.85rem;
+            color: #6b7280;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .result-meta span {
+            background: #e5e7eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .loading .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .timestamp {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .enhanced-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .json-toggle {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .json-toggle:hover {
+            background: #4b5563;
+        }
+
+        .json-view {
+            display: none;
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .result-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 BRAF Dashboard</h1>
+            <p>Browser Automation Framework Results<span class="enhanced-badge">Enhanced ML</span></p>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading BRAF results...</p>
+        </div>
+
+        <div id="error" class="error-message" style="display: none;">
+            <h3>❌ Error Loading Results</h3>
+            <p id="error-message"></p>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Targets</h3>
+                    <div class="value info" id="total-targets">-</div>
+                    <div class="label">Processed</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Success Rate</h3>
+                    <div class="value success" id="success-rate">-</div>
+                    <div class="label">Successful</div>
+                </div>
+                <div class="stat-card">
+                    <h3>HTTP Scraper</h3>
+                    <div class="value secondary" id="http-used">-</div>
+                    <div class="label">Fast & Efficient</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Browser Scraper</h3>
+                    <div class="value warning" id="browser-used">-</div>
+                    <div class="label">JavaScript Capable</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Execution Time</h3>
+                    <div class="value info" id="execution-time">-</div>
+                    <div class="label">Total Duration</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Parallel Speedup</h3>
+                    <div class="value success" id="parallel-speedup">-</div>
+                    <div class="label">Performance Gain</div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>📋 Scraping Results</h2>
+                <button class="json-toggle" onclick="toggleJsonView()">Toggle Raw JSON</button>
+                <div id="json-view" class="json-view"></div>
+                <div id="results-list"></div>
+            </div>
+
+            <div class="timestamp" id="last-updated"></div>
+        </div>
+    </div>
+
+    <script>
+        let rawData = null;
+
+        async function loadResults() {
+            try {
+                // Try enhanced results first, then fallback to basic results
+                let response;
+                try {
+                    response = await fetch('../data/enhanced_results.json');
+                    if (!response.ok) throw new Error('Enhanced results not found');
+                } catch (e) {
+                    console.log('Enhanced results not found, trying basic results...');
+                    response = await fetch('../data/results.json');
+                    if (!response.ok) throw new Error('No results found');
+                }
+
+                const data = await response.json();
+                rawData = data;
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error loading results:', error);
+                showError(`Failed to load results: ${error.message}`);
+            }
+        }
+
+        function displayResults(data) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+
+            // Determine data structure
+            let results, stats, executionInfo;
+            
+            if (data.enhanced_braf_execution) {
+                // Enhanced BRAF format
+                results = data.results || [];
+                stats = data.enhanced_braf_execution.statistics || {};
+                executionInfo = data.enhanced_braf_execution;
+                document.querySelector('.enhanced-badge').style.display = 'inline-block';
+            } else if (data.github_actions_execution) {
+                // GitHub Actions format
+                results = data.results || [];
+                stats = {
+                    total_targets: data.github_actions_execution.targets_processed,
+                    successful: results.filter(r => r.success).length,
+                    failed: results.filter(r => !r.success).length,
+                    http_used: results.filter(r => r.scraper_used === 'http').length,
+                    browser_used: results.filter(r => r.scraper_used === 'browser').length
+                };
+                executionInfo = data.github_actions_execution;
+            } else {
+                // Basic format
+                results = data.results || data || [];
+                stats = {
+                    total_targets: results.length,
+                    successful: results.filter(r => r.success).length,
+                    failed: results.filter(r => !r.success).length,
+                    http_used: results.filter(r => r.scraper_used === 'http').length,
+                    browser_used: results.filter(r => r.scraper_used === 'browser').length
+                };
+            }
+
+            // Update statistics
+            updateStats(stats);
+            
+            // Display results
+            displayResultsList(results);
+            
+            // Update timestamp
+            updateTimestamp(executionInfo);
+            
+            // Update JSON view
+            document.getElementById('json-view').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function updateStats(stats) {
+            document.getElementById('total-targets').textContent = stats.total_targets || 0;
+            
+            const successRate = stats.total_targets > 0 
+                ? ((stats.successful / stats.total_targets) * 100).toFixed(1) + '%'
+                : '0%';
+            document.getElementById('success-rate').textContent = successRate;
+            
+            document.getElementById('http-used').textContent = stats.http_used || 0;
+            document.getElementById('browser-used').textContent = stats.browser_used || 0;
+            
+            // Execution time
+            const execTime = stats.total_execution_time || 0;
+            document.getElementById('execution-time').textContent = execTime > 0 
+                ? execTime.toFixed(2) + 's' 
+                : 'N/A';
+            
+            // Parallel speedup
+            const speedup = stats.parallel_speedup || 0;
+            document.getElementById('parallel-speedup').textContent = speedup > 1 
+                ? speedup.toFixed(2) + 'x' 
+                : 'N/A';
+        }
+
+        function displayResultsList(results) {
+            const container = document.getElementById('results-list');
+            container.innerHTML = '';
+
+            if (!results || results.length === 0) {
+                container.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = `result-item ${result.success ? 'success' : 'error'}`;
+                
+                const status = result.success ? '✅' : '❌';
+                const scraper = result.scraper_used || 'unknown';
+                const execTime = result.execution_time ? `${result.execution_time.toFixed(2)}s` : 'N/A';
+                const title = result.title ? result.title.substring(0, 50) + '...' : 'No title';
+                const wordCount = result.word_count || 0;
+                
+                // Decision explanation
+                let decisionInfo = '';
+                if (result.decision_explanation) {
+                    const explanation = result.decision_explanation;
+                    const confidence = (explanation.confidence * 100).toFixed(1);
+                    decisionInfo = `<span>Confidence: ${confidence}%</span>`;
+                }
+                
+                item.innerHTML = `
+                    <div class="result-status">${status}</div>
+                    <div class="result-content">
+                        <div class="result-url">${result.url}</div>
+                        <div class="result-meta">
+                            <span>Scraper: ${scraper.toUpperCase()}</span>
+                            <span>Time: ${execTime}</span>
+                            <span>Words: ${wordCount}</span>
+                            ${decisionInfo}
+                            ${result.error ? `<span style="color: #dc2626;">Error: ${result.error}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        function updateTimestamp(executionInfo) {
+            const timestampEl = document.getElementById('last-updated');
+            if (executionInfo && executionInfo.timestamp) {
+                const date = new Date(executionInfo.timestamp);
+                timestampEl.textContent = `Last updated: ${date.toLocaleString()}`;
+            } else {
+                timestampEl.textContent = `Last updated: ${new Date().toLocaleString()}`;
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+
+        function toggleJsonView() {
+            const jsonView = document.getElementById('json-view');
+            if (jsonView.style.display === 'none' || !jsonView.style.display) {
+                jsonView.style.display = 'block';
+            } else {
+                jsonView.style.display = 'none';
+            }
+        }
+
+        // Auto-refresh every 5 minutes
+        function startAutoRefresh() {
+            setInterval(loadResults, 5 * 60 * 1000);
+        }
+
+        // Load results on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadResults();
+            startAutoRefresh();
+        });
+
+        // Manual refresh with keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                loadResults();
+            }
+        });
+    </script>
+</body>
+</html>

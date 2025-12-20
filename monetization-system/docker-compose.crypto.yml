@@ -1,0 +1,279 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for cryptocurrency operations
+  postgres:
+    image: postgres:15-alpine
+    container_name: braf_crypto_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: braf_crypto_prod
+      POSTGRES_USER: ${DB_USER:-braf_crypto_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-crypto_secure_pass_2024!}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_crypto_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    command: >
+      postgres 
+      -c shared_buffers=256MB
+      -c max_connections=200
+      -c effective_cache_size=768MB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-braf_crypto_user}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - crypto_network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: braf_crypto_redis
+    restart: unless-stopped
+    command: >
+      redis-server 
+      --appendonly yes 
+      --appendfsync everysec 
+      --maxmemory 512mb 
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_crypto_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - crypto_network
+
+  # Main BRAF Cryptocurrency Application
+  braf_crypto_app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    container_name: braf_crypto_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database
+      - DATABASE_URL=postgresql://${DB_USER:-braf_crypto_user}:${DB_PASSWORD:-crypto_secure_pass_2024!}@postgres:5432/braf_crypto_prod
+      - REDIS_URL=redis://redis:6379/0
+      
+      # NOWPayments Configuration (LIVE)
+      - NOWPAYMENTS_API_KEY=RD7WEXF-QTW4N7P-HMV12F9-MPANF4G
+      - NOWPAYMENTS_BASE_URL=https://api.nowpayments.io/v1
+      - NOWPAYMENTS_SANDBOX=false
+      - NOWPAYMENTS_WEBHOOK_SECRET=${NOWPAYMENTS_WEBHOOK_SECRET:-crypto_webhook_secret_2024}
+      - NOWPAYMENTS_CALLBACK_URL=https://${DOMAIN:-yourdomain.com}/api/crypto/webhook/nowpayments
+      
+      # System Configuration
+      - ENVIRONMENT=production
+      - BASE_URL=https://${DOMAIN:-yourdomain.com}
+      - SECRET_KEY=${SECRET_KEY:-super-secret-crypto-key-change-this}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-jwt-secret-crypto-key}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-32-char-encryption-key-change-this}
+      
+      # Cloudflare
+      - CLOUDFLARE_API_KEY=c40ef9c9bf82658bb72b21fd80944dac
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL:-your-email@example.com}
+      - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID:-your-zone-id}
+      
+      # Database ID
+      - DATABASE_ID=cec3b6d4-14c6-4256-9225-a30f14bfcb2c
+      
+      # Security
+      - RATE_LIMIT_ENABLED=true
+      - MAX_REQUESTS_PER_MINUTE=100
+      - COMPLIANCE_ENABLED=true
+      
+      # Browser Automation
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - PYTHONUNBUFFERED=1
+      
+    volumes:
+      - ./data:/app/data:rw
+      - ./logs:/app/logs:rw
+      - ./uploads:/app/uploads:rw
+    ports:
+      - "8000:8000"
+    networks:
+      - crypto_network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; r = requests.get('http://localhost:8000/api/crypto/webhook/test', timeout=5); exit(0 if r.status_code == 200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Celery Worker for background crypto processing
+  celery_crypto_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: braf_crypto_celery
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+      - braf_crypto_app
+    command: >
+      celery -A worker.celery_app worker 
+      --loglevel=info 
+      --concurrency=4 
+      --max-tasks-per-child=100
+      --queues=crypto_processing,default
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-braf_crypto_user}:${DB_PASSWORD:-crypto_secure_pass_2024!}@postgres:5432/braf_crypto_prod
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - NOWPAYMENTS_API_KEY=RD7WEXF-QTW4N7P-HMV12F9-MPANF4G
+      - ENVIRONMENT=production
+    volumes:
+      - ./data:/app/data:rw
+      - ./logs:/app/logs:rw
+    networks:
+      - crypto_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # Nginx Reverse Proxy with SSL
+  nginx:
+    image: nginx:alpine
+    container_name: braf_crypto_nginx
+    restart: unless-stopped
+    depends_on:
+      - braf_crypto_app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./static:/static:ro
+    networks:
+      - crypto_network
+    environment:
+      - DOMAIN=${DOMAIN:-yourdomain.com}
+
+  # Flower for Celery monitoring
+  flower:
+    image: mher/flower:1.0
+    container_name: braf_crypto_flower
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - celery_crypto_worker
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_BASIC_AUTH=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-flower_admin_2024}
+    networks:
+      - crypto_network
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: braf_crypto_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_crypto_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    networks:
+      - crypto_network
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: braf_crypto_grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_crypto_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-grafana_admin_2024}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=${DOMAIN:-yourdomain.com}
+      - GF_SERVER_ROOT_URL=https://${DOMAIN:-yourdomain.com}/grafana/
+    networks:
+      - crypto_network
+
+volumes:
+  postgres_crypto_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/postgres
+  redis_crypto_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/redis
+  prometheus_crypto_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/prometheus
+  grafana_crypto_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/grafana
+
+networks:
+  crypto_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16

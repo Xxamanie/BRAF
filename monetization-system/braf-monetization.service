@@ -1,0 +1,15 @@
+[Unit]
+Description=BRAF Monetization System
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/braf-monetization
+Environment=PATH=/opt/braf-monetization/venv/bin
+ExecStart=/opt/braf-monetization/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

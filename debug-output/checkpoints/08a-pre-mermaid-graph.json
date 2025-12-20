@@ -1,0 +1,60 @@
+{
+  "timestamp": "2025-12-20T11:46:02.523Z",
+  "summary": {
+    "nodeCount": 1,
+    "edgeCount": 1,
+    "nodeTypes": {
+      "symbol": 1
+    },
+    "edgeTypes": {
+      "calls": 1
+    },
+    "errorNodes": 0,
+    "suspectNodes": 0
+  },
+  "sampleNodes": [
+    {
+      "id": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+      "label": "run_main",
+      "kind": "symbol",
+      "file": "c:\\Users\\sirjv\\Quiter\\src\\braf\\worker\\main.py",
+      "line": 1,
+      "badges": [
+        "spine"
+      ]
+    }
+  ],
+  "sampleEdges": [
+    {
+      "from": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+      "to": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+      "kind": "calls",
+      "confidence": 0.4
+    }
+  ],
+  "fullGraph": {
+    "nodes": [
+      {
+        "id": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+        "label": "run_main",
+        "file": "c:\\Users\\sirjv\\Quiter\\src\\braf\\worker\\main.py",
+        "kind": "symbol",
+        "line": 1,
+        "badges": [
+          "spine"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "from": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+        "to": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+        "kind": "calls",
+        "confidence": 0.4,
+        "evidence": [
+          "ast-forward"
+        ]
+      }
+    ]
+  }
+}

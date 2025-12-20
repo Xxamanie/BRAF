@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  braf_app:
+    build:
+      context: ../app
+      dockerfile: ../docker/Dockerfile.production
+    container_name: braf_production_app
+    environment:
+      - DATABASE_URL=postgresql://braf_user:braf_password@postgres:5432/braf_db
+      - REDIS_URL=redis://redis:6379/0
+      - BRAF_ENVIRONMENT=production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    
+  braf_worker:
+    build:
+      context: ../app
+      dockerfile: ../docker/Dockerfile.production
+    container_name: braf_production_worker
+    command: celery -A worker worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://braf_user:braf_password@postgres:5432/braf_db
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    
+  postgres:
+    image: postgres:15-alpine
+    container_name: braf_production_postgres
+    environment:
+      - POSTGRES_DB=braf_db
+      - POSTGRES_USER=braf_user
+      - POSTGRES_PASSWORD=braf_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    
+  redis:
+    image: redis:7-alpine
+    container_name: braf_production_redis
+    restart: unless-stopped
+    
+  nginx:
+    image: nginx:alpine
+    container_name: braf_production_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/braf.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - braf_app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

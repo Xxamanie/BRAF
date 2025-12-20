@@ -1,0 +1,46 @@
+{
+  "name": "BRAF Live Deployment Package",
+  "version": "1.0.0",
+  "build_date": "2025-12-19T13:43:06.691156",
+  "system_info": {
+    "platform": "Windows",
+    "architecture": "64bit",
+    "python_version": "3.14.2",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 142 Stepping 10, GenuineIntel",
+    "timestamp": "2025-12-19T13:43:06.129952"
+  },
+  "components": [
+    "Core BRAF Framework",
+    "Monetization System",
+    "Intelligence Layer",
+    "Research System (NEXUS7)",
+    "Security Modules",
+    "Payment Integrations",
+    "Cryptocurrency Support",
+    "Ethical Automation",
+    "Social Media Collection",
+    "Web Scraping Framework",
+    "Docker Infrastructure",
+    "Monitoring Stack"
+  ],
+  "features": [
+    "Enhanced withdrawal system (13+ cryptocurrencies)",
+    "Real-time currency conversion",
+    "Comprehensive timeout configuration",
+    "Ethical automation safeguards",
+    "Academic research coordination",
+    "Live payment integrations",
+    "Intelligence optimization",
+    "Security compliance",
+    "Production monitoring",
+    "Auto-scaling capabilities"
+  ],
+  "requirements": {
+    "python": ">=3.8",
+    "memory": "8GB minimum, 16GB recommended",
+    "storage": "50GB minimum",
+    "cpu": "4 cores minimum",
+    "os": "Linux (Ubuntu 20.04+), Windows 10+, macOS 10.15+"
+  }
+}

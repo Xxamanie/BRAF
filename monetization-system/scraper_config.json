@@ -1,0 +1,47 @@
+{
+  "urls": [
+    "https://httpbin.org/html",
+    "https://example.com",
+    "https://jsonplaceholder.typicode.com/posts/1",
+    "https://news.ycombinator.com",
+    "https://www.reddit.com/r/programming.json"
+  ],
+  "scraper_config": {
+    "max_pages_per_run": 5,
+    "delay_between_pages": 2,
+    "timeout_per_page": 30,
+    "max_retries": 2,
+    "preferred_scraper": "http",
+    "fallback_enabled": true,
+    "headless": true
+  },
+  "url_specific_config": {
+    "https://news.ycombinator.com": {
+      "preferred_scraper": "browser",
+      "timeout_per_page": 60
+    },
+    "https://jsonplaceholder.typicode.com/posts/1": {
+      "preferred_scraper": "http",
+      "timeout_per_page": 10
+    }
+  },
+  "scraper_settings": {
+    "http": {
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+      },
+      "timeout": 30,
+      "allow_redirects": true
+    },
+    "browser": {
+      "headless": true,
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "timeout": 60000,
+      "wait_for": "domcontentloaded"
+    }
+  }
+}

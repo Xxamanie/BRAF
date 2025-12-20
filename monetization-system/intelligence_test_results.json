@@ -1,0 +1,35 @@
+{
+  "Platform Intelligence Engine": {
+    "success": false,
+    "error": "keyword argument repeated: earning_rate_usd_per_hour (platform_intelligence_engine.py, line 173)"
+  },
+  "Behavior Profile Manager": {
+    "success": true,
+    "total_platforms": 4,
+    "profile_structure_valid": true,
+    "custom_profile_created": true,
+    "performance_tracking": true
+  },
+  "Earning Optimizer": {
+    "success": false,
+    "error": "No forecast data generated"
+  },
+  "Network Traffic Analyzer": {
+    "success": true,
+    "analyzer_initialized": true,
+    "summary_available": true,
+    "endpoint_discovery": true
+  },
+  "Intelligent Task Executor": {
+    "success": false,
+    "error": "keyword argument repeated: earning_rate_usd_per_hour (platform_intelligence_engine.py, line 173)"
+  },
+  "BRAF Integration": {
+    "success": false,
+    "error": "keyword argument repeated: earning_rate_usd_per_hour (platform_intelligence_engine.py, line 173)"
+  },
+  "End-to-End Intelligence": {
+    "success": false,
+    "error": "keyword argument repeated: earning_rate_usd_per_hour (platform_intelligence_engine.py, line 173)"
+  }
+}

@@ -1,0 +1,12 @@
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+scrape_configs:
+- job_name: braf-c2
+  static_configs:
+  - targets:
+    - c2_server:8000
+- job_name: braf-workers
+  static_configs:
+  - targets:
+    - worker_node:8001

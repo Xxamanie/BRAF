@@ -1,0 +1,531 @@
+version: '3.8'
+
+# BRAF Docker Compose with Comprehensive Timeout Configuration
+# This configuration includes all timeout settings for production deployment
+
+services:
+  # PostgreSQL Database with Timeout Configuration
+  postgres:
+    image: postgres:15-alpine
+    container_name: braf_postgres
+    environment:
+      POSTGRES_DB: braf_db
+      POSTGRES_USER: braf_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-braf_secure_password_2024}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # Connection timeout settings
+      PGCONNECT_TIMEOUT: "30"
+      PGSTATEMENT_TIMEOUT: "60000"  # 60 seconds
+      PGIDLE_IN_TRANSACTION_SESSION_TIMEOUT: "300000"  # 5 minutes
+    command: >
+      postgres
+      -c statement_timeout=60000
+      -c idle_in_transaction_session_timeout=300000
+      -c tcp_keepalives_idle=60
+      -c tcp_keepalives_interval=10
+      -c tcp_keepalives_count=6
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U braf_user -d braf_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # Redis Cache with Timeout Configuration
+  redis:
+    image: redis:7-alpine
+    container_name: braf_redis
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-braf_redis_2024}
+      --timeout 300
+      --tcp-keepalive 60
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    restart: unless-stopped
+    stop_grace_period: 10s
+
+  # RabbitMQ Message Queue with Timeout Configuration
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: braf_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: braf
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-braf_rabbit_2024}
+      RABBITMQ_DEFAULT_VHOST: braf_vhost
+      # Timeout configurations
+      RABBITMQ_HANDSHAKE_TIMEOUT: "30000"  # 30 seconds
+      RABBITMQ_CHANNEL_MAX: "2048"
+      RABBITMQ_HEARTBEAT: "60"  # 60 seconds
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.6"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./docker/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # BRAF Main Application with Timeout Configuration
+  braf_app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+      args:
+        - BUILD_DATE=${BUILD_DATE:-2024-12-18}
+        - VERSION=${VERSION:-1.0.0}
+    container_name: braf_main_app
+    environment:
+      # Database Configuration
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - DB_POOL_SIZE=20
+      - DB_MAX_OVERFLOW=40
+      - DB_POOL_TIMEOUT=30
+      - DB_POOL_RECYCLE=3600
+      - DB_ECHO=false
+      
+      # Redis Configuration
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - REDIS_SOCKET_TIMEOUT=5
+      - REDIS_SOCKET_CONNECT_TIMEOUT=5
+      - REDIS_SOCKET_KEEPALIVE=true
+      - REDIS_SOCKET_KEEPALIVE_OPTIONS={"TCP_KEEPIDLE":60,"TCP_KEEPINTVL":10,"TCP_KEEPCNT":6}
+      
+      # RabbitMQ Configuration
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - CELERY_BROKER_CONNECTION_TIMEOUT=30
+      - CELERY_BROKER_CONNECTION_RETRY=true
+      - CELERY_BROKER_CONNECTION_MAX_RETRIES=10
+      - CELERY_TASK_TIME_LIMIT=3600
+      - CELERY_TASK_SOFT_TIME_LIMIT=3300
+      - CELERY_WORKER_PREFETCH_MULTIPLIER=4
+      
+      # Application Configuration
+      - BRAF_ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY:-braf_secret_key_change_in_production}
+      - DEBUG=false
+      
+      # HTTP Timeout Configuration
+      - UVICORN_TIMEOUT_KEEP_ALIVE=75
+      - UVICORN_TIMEOUT_GRACEFUL_SHUTDOWN=30
+      - HTTP_CLIENT_TIMEOUT=60
+      - HTTP_CLIENT_CONNECT_TIMEOUT=10
+      
+      # Browser Automation Timeouts
+      - BROWSER_PAGE_LOAD_TIMEOUT=60
+      - BROWSER_SCRIPT_TIMEOUT=30
+      - BROWSER_IMPLICIT_WAIT=10
+      - BROWSER_EXPLICIT_WAIT=30
+      
+      # Task Execution Timeouts
+      - TASK_EXECUTION_TIMEOUT=3600
+      - TASK_RETRY_TIMEOUT=300
+      - TASK_MAX_RETRIES=3
+      
+      # API Rate Limiting
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_PER_MINUTE=60
+      - RATE_LIMIT_BURST=100
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./config:/app/config
+      - /dev/shm:/dev/shm  # Shared memory for browser automation
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+      - "8003:8003"
+      - "8004:8004"
+    networks:
+      - braf_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+        reservations:
+          cpus: '2.0'
+          memory: 2G
+    restart: unless-stopped
+    stop_grace_period: 60s
+
+  # BRAF Worker Node 1 with Timeout Configuration
+  braf_worker_1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_worker_1
+    command: >
+      celery -A worker worker
+      --loglevel=info
+      --concurrency=4
+      --hostname=worker1@%h
+      --time-limit=3600
+      --soft-time-limit=3300
+      --max-tasks-per-child=100
+      --prefetch-multiplier=4
+    environment:
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - WORKER_ID=worker_1
+      - CELERY_BROKER_CONNECTION_TIMEOUT=30
+      - CELERY_TASK_TIME_LIMIT=3600
+      - CELERY_TASK_SOFT_TIME_LIMIT=3300
+      - CELERY_WORKER_SEND_TASK_EVENTS=true
+      - CELERY_TASK_SEND_SENT_EVENT=true
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - /dev/shm:/dev/shm
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+      - rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A worker inspect ping -d worker1@$HOSTNAME"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    restart: unless-stopped
+    stop_grace_period: 120s
+
+  # BRAF Worker Node 2 with Timeout Configuration
+  braf_worker_2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_worker_2
+    command: >
+      celery -A worker worker
+      --loglevel=info
+      --concurrency=4
+      --hostname=worker2@%h
+      --time-limit=3600
+      --soft-time-limit=3300
+      --max-tasks-per-child=100
+      --prefetch-multiplier=4
+    environment:
+      - DATABASE_URL=postgresql://braf_user:${POSTGRES_PASSWORD:-braf_secure_password_2024}@postgres:5432/braf_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-braf_redis_2024}@redis:6379/0
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - WORKER_ID=worker_2
+      - CELERY_BROKER_CONNECTION_TIMEOUT=30
+      - CELERY_TASK_TIME_LIMIT=3600
+      - CELERY_TASK_SOFT_TIME_LIMIT=3300
+      - CELERY_WORKER_SEND_TASK_EVENTS=true
+      - CELERY_TASK_SEND_SENT_EVENT=true
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - /dev/shm:/dev/shm
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+      - rabbitmq
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A worker inspect ping -d worker2@$HOSTNAME"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+    restart: unless-stopped
+    stop_grace_period: 120s
+
+  # Nginx Reverse Proxy with Timeout Configuration
+  nginx:
+    image: nginx:alpine
+    container_name: braf_nginx
+    volumes:
+      - ./docker/nginx-timeout.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - braf_network
+    depends_on:
+      - braf_app
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # Prometheus Monitoring with Timeout Configuration
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: braf_prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+      - '--query.timeout=2m'
+      - '--query.max-concurrency=20'
+    ports:
+      - "9090:9090"
+    networks:
+      - braf_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # Grafana Visualization with Timeout Configuration
+  grafana:
+    image: grafana/grafana:latest
+    container_name: braf_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-braf_grafana_2024}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_DATABASE_QUERY_TIMEOUT=60
+      - GF_DATAPROXY_TIMEOUT=60
+      - GF_DATAPROXY_KEEP_ALIVE_SECONDS=30
+      - GF_DATAPROXY_MAX_IDLE_CONNECTIONS=100
+      - GF_DATAPROXY_IDLE_CONN_TIMEOUT=90
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - braf_network
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # Flower - Celery Monitoring with Timeout Configuration
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.braf
+    container_name: braf_flower
+    command: >
+      celery -A worker flower
+      --port=5555
+      --broker_api=http://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:15672/api/
+      --persistent=true
+      --db=/app/data/flower.db
+      --max_tasks=10000
+    environment:
+      - RABBITMQ_URL=amqp://braf:${RABBITMQ_PASSWORD:-braf_rabbit_2024}@rabbitmq:5672/braf_vhost
+      - FLOWER_BASIC_AUTH=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-braf_flower_2024}
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "5555:5555"
+    networks:
+      - braf_network
+    depends_on:
+      - rabbitmq
+      - braf_worker_1
+      - braf_worker_2
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5555/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+networks:
+  braf_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: braf_br0
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.driver.mtu: "1500"
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/postgres
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/redis
+  rabbitmq_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/rabbitmq
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/prometheus
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/grafana

@@ -1,0 +1,72 @@
+# Minimal Dockerfile for BRAF Cryptocurrency System
+# Optimized for faster builds and smaller image size
+
+FROM python:3.11-slim
+
+LABEL maintainer="BRAF Cryptocurrency System"
+LABEL description="Minimal BRAF with real cryptocurrency integration"
+LABEL version="1.0.0-minimal"
+
+WORKDIR /app
+
+# Install minimal system dependencies
+RUN apt-get update && apt-get install -y \
+    # Essential build tools
+    gcc \
+    g++ \
+    curl \
+    wget \
+    # Cryptography dependencies
+    libssl-dev \
+    libffi-dev \
+    # Database connectivity
+    libpq-dev \
+    # Python development
+    python3-dev \
+    # Git for dependencies
+    git \
+    # Clean up
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Copy requirements and install Python dependencies
+COPY requirements-live.txt requirements.txt ./
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements-live.txt
+
+# Copy application code
+COPY . .
+
+# Environment variables for cryptocurrency operations
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV ENVIRONMENT=production
+
+# NOWPayments configuration
+ENV NOWPAYMENTS_API_KEY=RD7WEXF-QTW4N7P-HMV12F9-MPANF4G
+ENV NOWPAYMENTS_BASE_URL=https://api.nowpayments.io/v1
+ENV NOWPAYMENTS_SANDBOX=false
+
+# Database and security configuration
+ENV DATABASE_ID=cec3b6d4-14c6-4256-9225-a30f14bfcb2c
+ENV CLOUDFLARE_API_KEY=c40ef9c9bf82658bb72b21fd80944dac
+
+# Create non-root user
+RUN useradd -m -u 1000 braf_user \
+    && chown -R braf_user:braf_user /app
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/data \
+    && chown -R braf_user:braf_user /app/logs /app/data
+
+USER braf_user
+
+# Health check for cryptocurrency system
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; r = requests.get('http://localhost:8000/api/crypto/webhook/test', timeout=5); exit(0 if r.status_code == 200 else 1)"
+
+# Expose port
+EXPOSE 8000
+
+# Start application
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

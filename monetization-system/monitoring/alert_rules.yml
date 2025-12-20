@@ -1,0 +1,114 @@
+groups:
+  - name: braf_worker_alerts
+    rules:
+      # BRAF Worker Health Alerts
+      - alert: BRAFWorkerDown
+        expr: up{job="braf-worker"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BRAF Worker is down"
+          description: "BRAF Worker has been down for more than 1 minute."
+
+      - alert: BRAFWorkerHighCPU
+        expr: rate(process_cpu_seconds_total{job="braf-worker"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BRAF Worker high CPU usage"
+          description: "BRAF Worker CPU usage is above 80% for more than 5 minutes."
+
+      - alert: BRAFWorkerHighMemory
+        expr: process_resident_memory_bytes{job="braf-worker"} / 1024 / 1024 > 1500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "BRAF Worker high memory usage"
+          description: "BRAF Worker memory usage is above 1.5GB for more than 5 minutes."
+
+  - name: database_alerts
+    rules:
+      # PostgreSQL Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute."
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL high connection usage"
+          description: "PostgreSQL connection usage is above 80% for more than 5 minutes."
+
+  - name: redis_alerts
+    rules:
+      # Redis Alerts
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute."
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis high memory usage"
+          description: "Redis memory usage is above 90% for more than 5 minutes."
+
+  - name: celery_alerts
+    rules:
+      # Celery Worker Alerts
+      - alert: CeleryWorkerDown
+        expr: up{job="celery-worker"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery worker is down"
+          description: "Celery worker has been down for more than 2 minutes."
+
+      - alert: CeleryHighQueueLength
+        expr: celery_queue_length > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery queue length is high"
+          description: "Celery queue has more than 100 pending tasks for more than 5 minutes."
+
+  - name: system_alerts
+    rules:
+      # System Resource Alerts
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is above 85% for more than 5 minutes."
+
+      - alert: SystemLoadHigh
+        expr: node_load1 > 4
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "System load is high"
+          description: "System load average is above 4 for more than 5 minutes."

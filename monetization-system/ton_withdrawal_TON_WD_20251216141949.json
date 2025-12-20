@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "withdrawal_id": "TON_WD_20251216141949",
+  "amount_usd": 50.0,
+  "amount_ton": 32.679739,
+  "ton_price_usd": 1.53,
+  "to_address": "UQBmMxSNU5PLmtib4xKsBH9zAg08681Tec0rcOHYB6F4vST7",
+  "transaction_hash": "28647122e35f502c7389ba73c30b7f11d0939684d9192d60b9cb2cdd83f3e02f",
+  "network_fee_ton": 0.01,
+  "status": "confirmed",
+  "timestamp": "2025-12-16T14:19:49.344858",
+  "demo_mode": true
+}

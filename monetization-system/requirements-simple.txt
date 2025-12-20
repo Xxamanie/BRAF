@@ -1,0 +1,48 @@
+# Core FastAPI and Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Database and ORM
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Caching and Task Queue
+redis==5.0.1
+celery==5.3.4
+
+# Payment Processing
+stripe==7.7.0
+
+# Cryptocurrency (simplified)
+web3==6.11.3
+
+# Browser Automation
+selenium==4.15.0
+
+# Security and Authentication
+cryptography==41.0.7
+pyotp==2.8.0
+
+# HTTP Requests and APIs
+requests==2.31.0
+httpx==0.25.2
+
+# Configuration and Environment
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# Monitoring and Logging
+prometheus-client==0.19.0
+
+# Email and Notifications
+jinja2==3.1.2
+
+# Utilities
+python-dateutil==2.8.2
+click==8.1.7
+
+# Additional Dependencies
+pillow==10.1.0
+schedule==1.2.0

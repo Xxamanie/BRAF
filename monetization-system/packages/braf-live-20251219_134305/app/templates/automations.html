@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAF - Automations</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .nav {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .automation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .automation-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .automation-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Automation Management</h1>
+            <p>Create and manage your browser automations</p>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <div class="nav-content">
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/automations" class="active">Automations</a>
+                <a href="/withdrawals">Withdrawals</a>
+                <a href="/profile">Profile</a>
+            </div>
+            <div>
+                <a href="/login" class="btn btn-secondary">Logout</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h3>Your Automations</h3>
+                <a href="/create-automation" class="btn">Create New Automation</a>
+            </div>
+            <div class="card-body">
+                <div class="automation-grid" id="automations-grid">
+                    <!-- Automations will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load automations on page load
+        window.addEventListener('load', function() {
+            loadAutomations();
+        });
+        
+        async function loadAutomations() {
+            const enterpriseId = localStorage.getItem('braf_enterprise_id');
+            const sessionToken = localStorage.getItem('braf_session');
+            
+            if (!enterpriseId || !sessionToken) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/automation/list/${enterpriseId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAutomations(data.automations || []);
+                } else {
+                    document.getElementById('automations-grid').innerHTML = '<p>Failed to load automations</p>';
+                }
+            } catch (error) {
+                document.getElementById('automations-grid').innerHTML = '<p>Error loading automations</p>';
+            }
+        }
+        
+        function displayAutomations(automations) {
+            const grid = document.getElementById('automations-grid');
+            
+            if (automations.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; grid-column: 1 / -1; padding: 40px;">
+                        <h3>No automations yet</h3>
+                        <p>Create your first automation to start earning!</p>
+                        <a href="/create-automation" class="btn" style="margin-top: 15px;">Create Automation</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = automations.map(automation => `
+                <div class="automation-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h4>${automation.template_type.charAt(0).toUpperCase() + automation.template_type.slice(1)}</h4>
+                        <span class="status-badge status-${automation.status}">${automation.status}</span>
+                    </div>
+                    <p><strong>Platform:</strong> ${automation.platform}</p>
+                    <p><strong>Total Earnings:</strong> $${automation.earnings_total.toFixed(2)}</p>
+                    <p><strong>Success Rate:</strong> ${(automation.success_rate * 100).toFixed(1)}%</p>
+                    <p><strong>Last Run:</strong> ${automation.last_run ? new Date(automation.last_run).toLocaleDateString() : 'Never'}</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" onclick="editAutomation('${automation.id}')">Edit</button>
+                        <button class="btn btn-secondary" onclick="toggleAutomation('${automation.id}', '${automation.status}')">
+                            ${automation.status === 'active' ? 'Pause' : 'Resume'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function editAutomation(id) {
+            window.location.href = `/edit-automation/${id}`;
+        }
+        
+        async function toggleAutomation(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+            // TODO: Implement API call to toggle automation status
+            alert(`Automation ${newStatus === 'active' ? 'resumed' : 'paused'}`);
+            loadAutomations(); // Reload to show updated status
+        }
+    </script>
+</body>
+</html>

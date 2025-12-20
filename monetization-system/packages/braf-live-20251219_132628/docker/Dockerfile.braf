@@ -1,0 +1,37 @@
+# BRAF Main Application Docker Image
+FROM braf-base:latest
+
+# Set working directory
+WORKDIR /app
+
+# Copy application code
+COPY . .
+
+# Install additional BRAF-specific dependencies
+RUN pip install --no-cache-dir \
+    selenium==4.15.2 \
+    undetected-chromedriver==3.5.4 \
+    playwright==1.40.0 \
+    requests-html==0.10.0 \
+    beautifulsoup4==4.12.2 \
+    fake-useragent==1.4.0 \
+    python-telegram-bot==20.7 \
+    discord.py==2.3.2
+
+# Install Playwright browsers
+RUN python -m playwright install chromium firefox webkit
+
+# Set environment variables
+ENV BRAF_ENVIRONMENT=production
+ENV BRAF_LOG_LEVEL=INFO
+ENV BRAF_WORKERS=4
+
+# Expose ports
+EXPOSE 8000 8001 8002 8003 8004
+
+# Health check for BRAF
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+# Start BRAF application
+CMD ["python", "start_enhanced_dashboard.py"]

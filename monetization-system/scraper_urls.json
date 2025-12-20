@@ -1,0 +1,27 @@
+{
+  "urls": [
+    "https://news.ycombinator.com",
+    "https://httpbin.org/html",
+    "https://example.com",
+    "https://www.reddit.com/r/programming.json",
+    "https://jsonplaceholder.typicode.com/posts/1"
+  ],
+  "config": {
+    "max_pages_per_run": 5,
+    "delay_between_pages": 3,
+    "timeout_per_page": 30,
+    "max_retries": 2,
+    "headless": true,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  },
+  "schedule": {
+    "enabled": true,
+    "interval_minutes": 60,
+    "max_daily_runs": 24
+  },
+  "notifications": {
+    "email_on_failure": false,
+    "webhook_url": null,
+    "slack_webhook": null
+  }
+}
