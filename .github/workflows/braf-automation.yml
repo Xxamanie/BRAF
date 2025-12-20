@@ -1,0 +1,179 @@
+name: BRAF Automation & Monetization
+
+on:
+  schedule:
+    # Run automation tasks every 4 hours
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: 'Task type to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - scraping
+        - automation
+        - monetization
+      headless:
+        description: 'Run browser in headless mode'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  automation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Install Playwright browsers
+      run: |
+        playwright install chromium
+        
+    - name: Run BRAF automation tasks
+      run: |
+        python -c "
+        import sys
+        sys.path.append('.')
+        
+        from workflows.task_scheduler import TaskScheduler
+        from datetime import datetime
+        import json
+        import os
+        
+        print('🚀 BRAF Automation & Monetization Workflow')
+        print('=' * 50)
+        print(f'⏰ Execution time: {datetime.now().isoformat()}')
+        
+        scheduler = TaskScheduler()
+        task_type = '${{ github.event.inputs.task_type }}' or 'all'
+        headless = '${{ github.event.inputs.headless }}' != 'false'
+        
+        print(f'📋 Task type: {task_type}')
+        print(f'🖥️  Headless mode: {headless}')
+        
+        results = []
+        
+        # Scraping tasks
+        if task_type in ['all', 'scraping']:
+            print('\\n🌐 Running scraping tasks...')
+            scraping_task = {
+                'type': 'scraping',
+                'targets': [
+                    {'url': 'https://example.com', 'requires_js': False},
+                    {'url': 'https://httpbin.org/html', 'requires_js': False},
+                    {'url': 'https://quotes.toscrape.com/js/', 'requires_js': True},
+                    {'url': 'https://jsonplaceholder.typicode.com/posts/1', 'requires_js': False}
+                ]
+            }
+            
+            scheduler.schedule_task('github_scraping', scraping_task, 'once')
+            scheduler.start_scheduler()
+            
+            import time
+            time.sleep(30)  # Wait for execution
+            
+            history = scheduler.get_task_history()
+            if history:
+                results.extend(history)
+                print(f'✅ Scraping completed: {len(history)} tasks executed')
+            
+            scheduler.stop_scheduler()
+        
+        # Automation tasks
+        if task_type in ['all', 'automation']:
+            print('\\n🤖 Running automation tasks...')
+            automation_task = {
+                'type': 'automation',
+                'url': 'https://quotes.toscrape.com/js/',
+                'headless': headless,
+                'actions': [
+                    {'type': 'wait', 'name': 'page_load', 'duration': 3},
+                    {'type': 'extract', 'name': 'quotes', 'selectors': {
+                        'title': 'title',
+                        'quote_count': '.quote'
+                    }},
+                    {'type': 'scroll', 'name': 'scroll_down', 'direction': 'down'}
+                ]
+            }
+            
+            scheduler.schedule_task('github_automation', automation_task, 'once')
+            scheduler.start_scheduler()
+            
+            time.sleep(45)  # Wait for execution
+            
+            history = scheduler.get_task_history()
+            if history:
+                results.extend(history[-1:])  # Get latest result
+                print(f'✅ Automation completed')
+            
+            scheduler.stop_scheduler()
+        
+        # Monetization tasks
+        if task_type in ['all', 'monetization']:
+            print('\\n💰 Running monetization tasks...')
+            monetization_task = {
+                'type': 'monetization',
+                'platform': 'github_actions',
+                'task_type': 'automated_execution',
+                'expected_earning': 0.10  # Simulated earning
+            }
+            
+            scheduler.schedule_task('github_monetization', monetization_task, 'once')
+            scheduler.start_scheduler()
+            
+            time.sleep(15)  # Wait for execution
+            
+            history = scheduler.get_task_history()
+            if history:
+                results.extend(history[-1:])  # Get latest result
+                print(f'✅ Monetization completed')
+            
+            scheduler.stop_scheduler()
+        
+        # Save results
+        os.makedirs('data', exist_ok=True)
+        
+        workflow_results = {
+            'github_actions_automation': {
+                'timestamp': datetime.now().isoformat(),
+                'task_type': task_type,
+                'headless_mode': headless,
+                'workflow_run': os.environ.get('GITHUB_RUN_ID', 'local'),
+                'total_tasks': len(results)
+            },
+            'results': results
+        }
+        
+        with open('data/automation_results.json', 'w') as f:
+            json.dump(workflow_results, f, indent=2)
+        
+        print(f'\\n📊 Workflow Summary:')
+        print(f'   ✅ Total tasks executed: {len(results)}')
+        print(f'   💾 Results saved to: data/automation_results.json')
+        print(f'\\n🎉 BRAF automation workflow completed!')
+        "
+        
+    - name: Commit and push results
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/automation_results.json
+        git commit -m "Update automation results - $(date)" || echo "No changes to commit"
+        git push || echo "No changes to push"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
