@@ -1,0 +1,45 @@
+{
+  "targets": [
+    {
+      "name": "Example Static",
+      "url": "https://example.com",
+      "requires_js": false,
+      "description": "Simple static HTML page for testing HTTP scraper"
+    },
+    {
+      "name": "HTTPBin HTML",
+      "url": "https://httpbin.org/html",
+      "requires_js": false,
+      "description": "HTTPBin HTML endpoint with sample content"
+    },
+    {
+      "name": "JSON API",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "requires_js": false,
+      "description": "JSON API endpoint for testing data extraction"
+    },
+    {
+      "name": "Quotes SPA",
+      "url": "https://quotes.toscrape.com/js/",
+      "requires_js": true,
+      "description": "JavaScript-rendered quotes page requiring browser scraper"
+    },
+    {
+      "name": "Hacker News",
+      "url": "https://news.ycombinator.com",
+      "requires_js": false,
+      "description": "Hacker News homepage with dynamic content"
+    },
+    {
+      "name": "HTTPBin JSON",
+      "url": "https://httpbin.org/json",
+      "requires_js": false,
+      "description": "HTTPBin JSON endpoint for API testing"
+    }
+  ],
+  "config": {
+    "timeout": 30,
+    "user_agent": "BRAF-Scraper/1.0",
+    "max_retries": 2
+  }
+}
