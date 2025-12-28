@@ -1,0 +1,17 @@
+[Unit]
+Description=BRAF Monetization System
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=C:\Users\sirjv\Quiter
+Environment=PATH=C:\Users\sirjv\Quiter/venv/bin
+ExecStart=C:\Users\sirjv\AppData\Local\Python\pythoncore-3.14-64\python.exe run_server.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

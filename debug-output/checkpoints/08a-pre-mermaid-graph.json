@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-20T11:46:02.523Z",
+  "timestamp": "2025-12-28T04:38:26.474Z",
   "summary": {
     "nodeCount": 1,
     "edgeCount": 1,
@@ -14,10 +14,10 @@
   },
   "sampleNodes": [
     {
-      "id": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
-      "label": "run_main",
+      "id": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
+      "label": "path_to_url",
       "kind": "symbol",
-      "file": "c:\\Users\\sirjv\\Quiter\\src\\braf\\worker\\main.py",
+      "file": "c:\\Users\\sirjv\\Quiter\\monetization-system\\venv\\Lib\\site-packages\\pip\\_internal\\utils\\urls.py",
       "line": 1,
       "badges": [
         "spine"
@@ -26,8 +26,8 @@
   ],
   "sampleEdges": [
     {
-      "from": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
-      "to": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+      "from": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
+      "to": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
       "kind": "calls",
       "confidence": 0.4
     }
@@ -35,9 +35,9 @@
   "fullGraph": {
     "nodes": [
       {
-        "id": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
-        "label": "run_main",
-        "file": "c:\\Users\\sirjv\\Quiter\\src\\braf\\worker\\main.py",
+        "id": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
+        "label": "path_to_url",
+        "file": "c:\\Users\\sirjv\\Quiter\\monetization-system\\venv\\Lib\\site-packages\\pip\\_internal\\utils\\urls.py",
         "kind": "symbol",
         "line": 1,
         "badges": [
@@ -47,8 +47,8 @@
     ],
     "edges": [
       {
-        "from": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
-        "to": "method_c__Users_sirjv_Quiter_src_braf_worker_main_py_run_main",
+        "from": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
+        "to": "method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
         "kind": "calls",
         "confidence": 0.4,
         "evidence": [

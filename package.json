@@ -6,13 +6,45 @@
   "directories": {
     "test": "tests"
   },
-  "scripts": {},
+  "scripts": {
+    "start": "node start-braf.js",
+    "worker": "node braf-worker.js",
+    "jobs": "node braf-jobs.js",
+    "earning": "node earning-tasks.js",
+    "demo": "node braf-jobs.js demo",
+    "stats": "node braf-jobs.js stats",
+    "test": "node test_enhanced_setup.js",
+    "run-worker": "node runWorker.js",
+    "simple-worker": "node simple-worker.js",
+    "simple-manager": "node simple-manager.js",
+    "manager": "node worker-manager.js",
+    "manager:start": "node worker-manager.js start",
+    "manager:pause": "node worker-manager.js pause",
+    "manager:resume": "node worker-manager.js resume",
+    "manager:stats": "node worker-manager.js stats"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@types/node": "^25.0.3"
-  }
+  },
+  "dependencies": {
+    "bullmq": "^5.66.2",
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.8.2",
+    "playwright": "^1.57.0",
+    "playwright-core": "^1.57.0",
+    "undici-types": "^7.16.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xxamanie/BRAF.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Xxamanie/BRAF/issues"
+  },
+  "homepage": "https://github.com/Xxamanie/BRAF#readme"
 }

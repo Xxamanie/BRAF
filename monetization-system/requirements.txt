@@ -18,7 +18,10 @@ asyncpg>=0.29.0
 sqlalchemy[asyncio]>=2.0.0
 
 # Browser automation
-playwright>=1.40.0
+playwright>=1.57.0
+playwright-stealth>=1.0.6
+# Additional browser automation utilities
+fake-useragent>=1.4.0
 
 # Configuration
 python-dotenv>=1.0.0

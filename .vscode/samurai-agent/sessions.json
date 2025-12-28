@@ -24,5 +24,31 @@
       "timestamp": 1766231164234,
       "generationStatus": "analyzing"
     }
+  },
+  {
+    "id": "44a1852f-9e68-4b2a-9587-fbbc952e4c02",
+    "title": "New Conversation",
+    "status": "active",
+    "messageCount": 10,
+    "totalTokens": 0,
+    "totalCost": 0,
+    "lastMessageAt": "2025-12-28T04:56:22.640Z",
+    "tags": [],
+    "metadata": {
+      "projectId": "default-project",
+      "model": "gemini-2.5-flash-free-tier",
+      "mode": "debugging",
+      "connectedCodebasePath": "c:\\Users\\sirjv\\Quiter"
+    },
+    "codeContextIds": [],
+    "previous_session_intent": "pure_discussion",
+    "pinnedFilePaths": [],
+    "createdAt": "2025-12-23T01:56:33.102Z",
+    "updatedAt": "2025-12-28T04:56:22.681Z",
+    "currentArtifact": {
+      "mermaidData": "flowchart TD\nclassDef ui fill:#E2E8F0,stroke:#475569,color:#111827,stroke-width:1px;\nclassDef api fill:#E0E7FF,stroke:#4338CA,color:#111827,stroke-width:1px;\nclassDef data fill:#E0F2F1,stroke:#0F766E,color:#111827,stroke-width:1px;\nclassDef auth fill:#F1F5F9,stroke:#334155,color:#111827,stroke-width:1px;\nclassDef infra fill:#F3F4F6,stroke:#4B5563,color:#111827,stroke-width:1px;\nlinkStyle default stroke:#94a3b8,color:#334155;\n\nmethod_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url[\"path_to_url\"]:::infra\nmethod_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url -->|calls| method_c__Users_sirjv_Quiter_monetization_system_venv_Lib_site_packages_pip__internal_utils_urls_py_path_to_url",
+      "timestamp": 1766896707889,
+      "generationStatus": "analyzing"
+    }
   }
 ]

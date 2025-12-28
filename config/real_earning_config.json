@@ -1,0 +1,21 @@
+{
+  "real_earning_mode": true,
+  "platforms": {
+    "swagbucks": {
+      "enabled": false,
+      "api_key": "YOUR_SWAGBUCKS_API_KEY",
+      "auto_transfer": true
+    },
+    "mturk": {
+      "enabled": false,
+      "access_key": "YOUR_MTURK_ACCESS_KEY",
+      "secret_key": "YOUR_MTURK_SECRET_KEY",
+      "auto_transfer": true
+    }
+  },
+  "maxel_integration": {
+    "auto_deposit": true,
+    "minimum_transfer": 1.0,
+    "currency": "USDT"
+  }
+}

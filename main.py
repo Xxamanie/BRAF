@@ -20,7 +20,7 @@ app = FastAPI(
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint for Fly.io"""
+    """Health check endpoint"""
     return {"status": "healthy", "service": "BRAF"}
 
 @app.get("/")
