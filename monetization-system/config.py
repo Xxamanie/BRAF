@@ -87,24 +87,28 @@ class Config:
     FREE_BETA_MODE = os.getenv("FREE_BETA_MODE", "true").lower() == "true"
     ENABLE_PAID_TIERS = os.getenv("ENABLE_PAID_TIERS", "false").lower() == "true"
     
-    # Compliance Settings
-    MAX_DAILY_EARNINGS = int(os.getenv("MAX_DAILY_EARNINGS", "2000"))
-    COMPLIANCE_CHECK_INTERVAL = int(os.getenv("COMPLIANCE_CHECK_INTERVAL", "3600"))
-    RISK_THRESHOLD_HIGH = float(os.getenv("RISK_THRESHOLD_HIGH", "0.8"))
-    RISK_THRESHOLD_MEDIUM = float(os.getenv("RISK_THRESHOLD_MEDIUM", "0.5"))
-    
-    # Withdrawal Limits
+    # Compliance Settings - REMOVED FOR UNLIMITED YIELD
+    # MAX_DAILY_EARNINGS = int(os.getenv("MAX_DAILY_EARNINGS", "2000"))
+    COMPLIANCE_CHECK_INTERVAL = 0  # Disabled compliance checks
+    RISK_THRESHOLD_HIGH = 1.0  # Accept all risks
+    RISK_THRESHOLD_MEDIUM = 1.0
+
+    # Withdrawal Limits - REMOVED FOR UNLIMITED WITHDRAWALS
     MIN_WITHDRAWAL = {
-        "opay": int(os.getenv("MIN_WITHDRAWAL_OPAY", "50")),
-        "palmpay": int(os.getenv("MIN_WITHDRAWAL_PALMPAY", "50")),
-        "crypto": int(os.getenv("MIN_WITHDRAWAL_CRYPTO", "100"))
+        "opay": 0,  # No minimum
+        "palmpay": 0,
+        "crypto": 0
     }
-    
-    # API Rate Limits
-    RATE_LIMITS = {
-        "withdrawal": f"{MAX_WITHDRAWALS_PER_DAY}/day",
-        "api_calls": f"{MAX_REQUESTS_PER_MINUTE}/minute"
-    }
+
+    # API Rate Limits - REMOVED FOR UNLIMITED SCALING
+    # RATE_LIMITS = {
+    #     "withdrawal": f"{MAX_WITHDRAWALS_PER_DAY}/day",
+    #     "api_calls": f"{MAX_REQUESTS_PER_MINUTE}/minute"
+    # }
+
+    # Unlimited scaling configuration
+    UNLIMITED_MODE = True
+    MAX_CONCURRENT_SESSIONS = 10000  # Support massive scaling
     
     # Subscription Tiers (FREE BETA - All tiers are free during beta period)
     SUBSCRIPTION_TIERS = {

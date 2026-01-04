@@ -2,9 +2,7 @@
 """
 Get Real Money in MAXEL Wallet - Simple Guide
 Your BRAF has earned $0.32 (simulated) - here's how to get real money
-"""
-import json
-from datetime import datetime
+""from datetime import datetime
 
 def check_braf_earnings():
     """Check current BRAF earnings"""
