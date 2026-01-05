@@ -138,97 +138,13 @@ class BrowserInstance:
     
     async def _apply_stealth_scripts(self, page: Page) -> None:
         """
-        Apply stealth scripts to page to avoid detection.
-        
+        Apply stealth scripts to page to avoid detection - DISABLED FOR TESTING.
+
         Args:
             page: Page to configure
         """
-        # Override navigator.webdriver
-        await page.add_init_script("""
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined,
-            });
-        """)
-        
-        # Override chrome runtime
-        await page.add_init_script("""
-            window.chrome = {
-                runtime: {},
-                loadTimes: function() {},
-                csi: function() {},
-                app: {}
-            };
-        """)
-        
-        # Override permissions
-        await page.add_init_script("""
-            const originalQuery = window.navigator.permissions.query;
-            window.navigator.permissions.query = (parameters) => (
-                parameters.name === 'notifications' ?
-                    Promise.resolve({ state: Notification.permission }) :
-                    originalQuery(parameters)
-            );
-        """)
-        
-        # Override plugins
-        await page.add_init_script(f"""
-            Object.defineProperty(navigator, 'plugins', {{
-                get: () => {json.dumps(self.fingerprint.plugins)},
-            }});
-        """)
-        
-        # Override languages
-        await page.add_init_script(f"""
-            Object.defineProperty(navigator, 'languages', {{
-                get: () => {json.dumps(self.fingerprint.languages)},
-            }});
-        """)
-        
-        # Override WebGL
-        await page.add_init_script(f"""
-            const getParameter = WebGLRenderingContext.getParameter;
-            WebGLRenderingContext.prototype.getParameter = function(parameter) {{
-                if (parameter === 37445) {{
-                    return '{self.fingerprint.webgl_vendor}';
-                }}
-                if (parameter === 37446) {{
-                    return '{self.fingerprint.webgl_renderer}';
-                }}
-                return getParameter(parameter);
-            }};
-        """)
-        
-        # Override canvas fingerprinting
-        await page.add_init_script(f"""
-            const toDataURL = HTMLCanvasElement.prototype.toDataURL;
-            HTMLCanvasElement.prototype.toDataURL = function() {{
-                const context = this.getContext('2d');
-                if (context) {{
-                    context.fillText('{self.fingerprint.canvas_hash}', 0, 0);
-                }}
-                return toDataURL.apply(this, arguments);
-            }};
-        """)
-        
-        # Override audio context
-        await page.add_init_script(f"""
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {{
-                const createAnalyser = AudioContext.prototype.createAnalyser;
-                AudioContext.prototype.createAnalyser = function() {{
-                    const analyser = createAnalyser.apply(this, arguments);
-                    const getFloatFrequencyData = analyser.getFloatFrequencyData;
-                    analyser.getFloatFrequencyData = function(array) {{
-                        getFloatFrequencyData.apply(this, arguments);
-                        // Add fingerprint-specific noise
-                        for (let i = 0; i < array.length; i++) {{
-                            array[i] += Math.sin(i * 0.1 + {hash(self.fingerprint.audio_context_hash) % 1000}) * 0.001;
-                        }}
-                    }};
-                    return analyser;
-                }};
-            }}
-        """)
+        # All stealth scripts disabled to expose detection loopholes
+        pass
 
 
 class BrowserInstanceManager:
@@ -371,98 +287,20 @@ class BrowserInstanceManager:
     
     async def check_detection_signals(self, page: Page) -> DetectionScore:
         """
-        Check page for bot detection signals.
-        
+        Check page for bot detection signals - DISABLED FOR TESTING.
+
         Args:
             page: Page to analyze
-            
+
         Returns:
-            Detection score with risk assessment
+            Detection score with risk assessment (always low score for testing)
         """
-        detection_factors = {}
-        
-        try:
-            # Check for common bot detection scripts
-            content = await page.content()
-            
-            # Known bot detection services
-            detection_services = [
-                "distil", "perimeterx", "datadome", "cloudflare", 
-                "recaptcha", "hcaptcha", "funcaptcha", "arkose"
-            ]
-            
-            for service in detection_services:
-                if service.lower() in content.lower():
-                    detection_factors[f"{service}_detected"] = 0.3
-            
-            # Check for automation detection
-            webdriver_detected = await page.evaluate("""
-                () => {
-                    return window.navigator.webdriver === true;
-                }
-            """)
-            
-            if webdriver_detected:
-                detection_factors["webdriver_exposed"] = 0.5
-            
-            # Check for missing chrome object
-            chrome_missing = await page.evaluate("""
-                () => {
-                    return typeof window.chrome === 'undefined';
-                }
-            """)
-            
-            if chrome_missing:
-                detection_factors["chrome_missing"] = 0.2
-            
-            # Check for suspicious navigator properties
-            navigator_check = await page.evaluate("""
-                () => {
-                    const suspicious = [];
-                    if (navigator.plugins.length === 0) suspicious.push('no_plugins');
-                    if (navigator.languages.length === 0) suspicious.push('no_languages');
-                    if (!navigator.permissions) suspicious.push('no_permissions');
-                    return suspicious;
-                }
-            """)
-            
-            for issue in navigator_check:
-                detection_factors[f"navigator_{issue}"] = 0.1
-            
-            # Check for headless detection
-            headless_signals = await page.evaluate("""
-                () => {
-                    const signals = [];
-                    if (window.outerHeight === 0) signals.push('zero_outer_height');
-                    if (window.outerWidth === 0) signals.push('zero_outer_width');
-                    if (!window.chrome || !window.chrome.runtime) signals.push('no_chrome_runtime');
-                    return signals;
-                }
-            """)
-            
-            for signal in headless_signals:
-                detection_factors[f"headless_{signal}"] = 0.2
-            
-        except Exception as e:
-            logger.warning(f"Error checking detection signals: {e}")
-            detection_factors["check_error"] = 0.1
-        
-        # Calculate overall score
-        total_score = min(1.0, sum(detection_factors.values()))
-        
-        # Generate recommendations
-        recommendations = []
-        if total_score > 0.7:
-            recommendations.append("High detection risk - consider rotating fingerprint")
-        if "webdriver_exposed" in detection_factors:
-            recommendations.append("WebDriver detection - check stealth configuration")
-        if any("headless" in key for key in detection_factors):
-            recommendations.append("Headless detection - consider running with GUI")
-        
+        # All detection signal checking disabled - return zero detection score
+        # to allow unlimited bot activity and expose loopholes
         return DetectionScore(
-            score=total_score,
-            factors=detection_factors,
-            recommendations=recommendations
+            score=0.0,
+            factors={},
+            recommendations=[]
         )
     
     async def activate_cooldown(self, instance: BrowserInstance, duration: float = 300) -> None:

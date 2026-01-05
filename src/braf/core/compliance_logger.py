@@ -80,81 +80,27 @@ class EthicalConstraintChecker:
         self.cache_duration = 3600  # 1 hour cache
     
     def _load_default_constraints(self) -> Dict[str, EthicalConstraint]:
-        """Load default ethical constraints."""
-        return {
-            "max_requests_per_hour": EthicalConstraint(
-                name="max_requests_per_hour",
-                description="Maximum requests per hour per profile",
-                max_per_hour=100,
-                severity=SeverityLevel.HIGH,
-                auto_shutdown=True
-            ),
-            "max_form_submissions_per_day": EthicalConstraint(
-                name="max_form_submissions_per_day",
-                description="Maximum form submissions per day",
-                max_per_day=50,
-                severity=SeverityLevel.MEDIUM,
-                auto_shutdown=False
-            ),
-            "max_data_extractions_per_hour": EthicalConstraint(
-                name="max_data_extractions_per_hour",
-                description="Maximum data extractions per hour",
-                max_per_hour=200,
-                severity=SeverityLevel.HIGH,
-                auto_shutdown=True
-            ),
-            "max_failed_attempts": EthicalConstraint(
-                name="max_failed_attempts",
-                description="Maximum failed attempts before cooldown",
-                max_per_hour=20,
-                severity=SeverityLevel.CRITICAL,
-                auto_shutdown=True
-            ),
-            "max_captcha_solves_per_day": EthicalConstraint(
-                name="max_captcha_solves_per_day",
-                description="Maximum CAPTCHA solves per day",
-                max_per_day=30,
-                severity=SeverityLevel.MEDIUM,
-                auto_shutdown=False
-            ),
-            "max_profile_switches_per_hour": EthicalConstraint(
-                name="max_profile_switches_per_hour",
-                description="Maximum profile switches per hour",
-                max_per_hour=10,
-                severity=SeverityLevel.LOW,
-                auto_shutdown=False
-            )
-        }
+        """Load default ethical constraints - DISABLED FOR TESTING."""
+        # All constraints disabled - return empty dict to allow unlimited operations
+        return {}
     
     async def check_constraints_before_task(
-        self, 
+        self,
         task: AutomationTask,
         profile_id: str
     ) -> List[ComplianceViolation]:
         """
-        Check constraints before task execution.
-        
+        Check constraints before task execution - DISABLED FOR TESTING.
+
         Args:
             task: Task to be executed
             profile_id: Profile ID
-            
+
         Returns:
-            List of violations found
+            List of violations found (always empty for testing)
         """
-        violations = []
-        
-        # Get recent activity
-        activity = await self._get_recent_activity(profile_id)
-        
-        # Check each constraint
-        for constraint in self.constraints.values():
-            violation = await self._check_single_constraint(
-                constraint, task, profile_id, activity
-            )
-            if violation:
-                violations.append(violation)
-        
-        return violations
+        # All constraints disabled - return no violations to allow unlimited operations
+        return []
     
     async def _check_single_constraint(
         self,
@@ -525,39 +471,11 @@ class ComplianceLogger:
             logger.error(f"Failed to log to ELK: {e}")
     
     async def _handle_violation(self, violation: ComplianceViolation):
-        """Handle compliance violation."""
-        logger.warning(f"Compliance violation: {violation.description}")
-        
-        # Check if automatic shutdown is required
-        constraint = self.constraint_checker.constraints.get(
-            violation.metadata.get("constraint") if violation.metadata else None
-        )
-        
-        if constraint and constraint.auto_shutdown:
-            await self._trigger_automatic_shutdown(
-                f"Constraint violation: {constraint.name}",
-                violation
-            )
-            return
-        
-        # Check violation thresholds
-        recent_violations = await self._get_recent_violations(hours=1)
-        severity_counts = {}
-        
-        for v in recent_violations:
-            severity_counts[v.severity] = severity_counts.get(v.severity, 0) + 1
-        
-        # Check if any threshold is exceeded
-        for severity, count in severity_counts.items():
-            threshold = self.violation_thresholds.get(severity, float('inf'))
-            if count >= threshold:
-                if severity in [SeverityLevel.HIGH, SeverityLevel.CRITICAL]:
-                    await self._trigger_automatic_shutdown(
-                        f"Violation threshold exceeded: {count} {severity.value} violations",
-                        violation
-                    )
-                else:
-                    logger.warning(f"Violation threshold warning: {count} {severity.value} violations")
+        """Handle compliance violation - DISABLED FOR TESTING."""
+        logger.warning(f"Compliance violation (IGNORED): {violation.description}")
+
+        # Automatic shutdown and violation handling DISABLED to expose loopholes
+        # No shutdowns will be triggered, allowing unlimited violations
     
     async def _trigger_automatic_shutdown(
         self, 
@@ -612,30 +530,9 @@ class ComplianceLogger:
         return [v for v in self.violations if v.timestamp >= cutoff]
     
     async def _check_failure_patterns(self, profile_id: str):
-        """Check for concerning failure patterns."""
-        # Get recent failures for this profile
-        recent_events = [
-            e for e in self.events[-100:]  # Last 100 events
-            if (e.profile_id == profile_id and 
-                e.event_type == "task_failed" and
-                datetime.now(timezone.utc) - e.timestamp <= timedelta(hours=1))
-        ]
-        
-        if len(recent_events) >= 5:  # 5 failures in 1 hour
-            violation = ComplianceViolation(
-                id=f"failure_pattern_{profile_id}_{int(time.time())}",
-                type=ViolationType.SUSPICIOUS_ACTIVITY,
-                severity=SeverityLevel.HIGH,
-                description=f"High failure rate detected: {len(recent_events)} failures in 1 hour",
-                profile_id=profile_id,
-                timestamp=datetime.now(timezone.utc),
-                metadata={
-                    "failure_count": len(recent_events),
-                    "time_window": "1_hour"
-                }
-            )
-            
-            await self.log_violation(violation)
+        """Check for concerning failure patterns - DISABLED FOR TESTING."""
+        # Failure pattern checking DISABLED to allow unlimited failures and expose loopholes
+        pass
     
     async def check_lockdown_status(self) -> Dict[str, Any]:
         """

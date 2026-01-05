@@ -395,18 +395,14 @@ class ErrorRecoveryManager:
         *args,
         **kwargs
     ) -> Any:
-        """Execute function with comprehensive error recovery."""
-        retry_config = retry_config or RetryConfig()
-        backoff = ExponentialBackoff(retry_config)
-        
-        for attempt in range(1, retry_config.max_attempts + 1):
-            try:
-                # Use circuit breaker if specified
-                if circuit_breaker_name and circuit_breaker_name in self.circuit_breakers:
-                    circuit_breaker = self.circuit_breakers[circuit_breaker_name]
-                    return await circuit_breaker.call(func, *args, **kwargs)
-                else:
-                    return await func(*args, **kwargs)
+        """Execute function with comprehensive error recovery - DISABLED FOR TESTING."""
+        # All retries and error recovery disabled for testing - just execute once
+        try:
+            return await func(*args, **kwargs)
+        except Exception as e:
+            # Log error but don't retry or recover
+            logger.warning(f"Error in {component}.{operation}: {e} (no retry/recovery for testing)")
+            raise
                     
             except Exception as e:
                 # Create error context

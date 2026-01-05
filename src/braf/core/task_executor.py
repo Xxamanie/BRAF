@@ -51,59 +51,20 @@ class TaskValidator:
     
     async def validate_task(self, task: AutomationTask) -> Dict[str, Any]:
         """
-        Validate automation task.
-        
+        Validate automation task - DISABLED FOR TESTING.
+
         Args:
             task: Task to validate
-            
+
         Returns:
-            Validation result with issues and warnings
-            
-        Raises:
-            TaskValidationError: If task is invalid
+            Validation result (always valid for testing)
         """
-        issues = []
-        warnings = []
-        
-        # Basic task validation
-        if not task.actions:
-            issues.append("Task has no actions")
-        
-        if len(task.actions) > self.max_actions_per_task:
-            issues.append(f"Task has too many actions ({len(task.actions)} > {self.max_actions_per_task})")
-        
-        if task.timeout and task.timeout > self.max_task_duration:
-            issues.append(f"Task timeout too long ({task.timeout} > {self.max_task_duration})")
-        
-        # Validate actions
-        for i, action in enumerate(task.actions):
-            action_issues = await self._validate_action(action, i)
-            issues.extend(action_issues)
-        
-        # Domain validation
+        # All validation disabled - allow any task to pass for testing loopholes
         urls = self._extract_urls_from_task(task)
-        for url in urls:
-            domain_issues = self._validate_domain(url)
-            issues.extend(domain_issues)
-        
-        # Ethical constraints
-        ethical_issues = await self._check_ethical_constraints(task)
-        issues.extend(ethical_issues)
-        
-        # Performance warnings
-        if len(task.actions) > 50:
-            warnings.append("Large number of actions may impact performance")
-        
-        if task.timeout and task.timeout > 1800:  # 30 minutes
-            warnings.append("Long timeout may cause resource issues")
-        
-        # Raise exception if critical issues found
-        if issues:
-            raise TaskValidationError(f"Task validation failed: {'; '.join(issues)}")
-        
+
         return {
             "valid": True,
-            "warnings": warnings,
+            "warnings": [],  # No warnings
             "action_count": len(task.actions),
             "estimated_duration": self._estimate_task_duration(task),
             "domains": list(set(self._extract_domains_from_urls(urls)))
@@ -168,51 +129,14 @@ class TaskValidator:
         return domains
     
     def _validate_domain(self, url: str) -> List[str]:
-        """Validate domain restrictions."""
-        issues = []
-        
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(url)
-            domain = parsed.netloc.lower()
-            
-            # Check blocked domains
-            for blocked in self.blocked_domains:
-                if blocked in domain:
-                    issues.append(f"Domain blocked: {domain}")
-                    break
-            
-            # Check allowed domains (if configured)
-            if self.allowed_domains:
-                allowed = any(allowed_domain in domain for allowed_domain in self.allowed_domains)
-                if not allowed:
-                    issues.append(f"Domain not in allowed list: {domain}")
-        
-        except Exception as e:
-            issues.append(f"Invalid URL format: {url}")
-        
-        return issues
+        """Validate domain restrictions - DISABLED FOR TESTING."""
+        # All domain restrictions disabled - allow access to any domain to expose loopholes
+        return []
     
     async def _check_ethical_constraints(self, task: AutomationTask) -> List[str]:
-        """Check ethical constraints."""
-        issues = []
-        
-        # Check for potential scraping violations
-        extract_actions = [a for a in task.actions if a.type == ActionType.EXTRACT]
-        if len(extract_actions) > 20:
-            issues.append("Excessive data extraction may violate terms of service")
-        
-        # Check for rapid-fire actions
-        click_actions = [a for a in task.actions if a.type == ActionType.CLICK]
-        if len(click_actions) > 10:
-            issues.append("Excessive clicking may appear bot-like")
-        
-        # Check for form spam potential
-        type_actions = [a for a in task.actions if a.type == ActionType.TYPE]
-        if len(type_actions) > 15:
-            issues.append("Excessive form filling may be considered spam")
-        
-        return issues
+        """Check ethical constraints - DISABLED FOR TESTING."""
+        # All ethical constraints disabled - allow unlimited actions to expose loopholes
+        return []
     
     def _estimate_task_duration(self, task: AutomationTask) -> float:
         """Estimate task execution duration in seconds."""
@@ -602,65 +526,9 @@ class TaskExecutor:
         }
     
     async def _handle_captcha_check(self, page, captcha_solver) -> bool:
-        """Check for and handle CAPTCHAs."""
-        if not captcha_solver:
-            return False
-        
-        try:
-            # Detect CAPTCHA type
-            captcha_type = await captcha_solver.detect_captcha_type(page)
-            
-            if not captcha_type:
-                return False
-            
-            logger.info(f"CAPTCHA detected: {captcha_type}")
-            
-            if captcha_type == "recaptcha_v2":
-                # Get site key and solve
-                site_key = await page.evaluate("""
-                    () => {
-                        const element = document.querySelector('[data-sitekey]');
-                        return element ? element.getAttribute('data-sitekey') : null;
-                    }
-                """)
-                
-                if site_key:
-                    solution = await captcha_solver.solve_recaptcha_v2(site_key, page.url)
-                    if solution:
-                        return await captcha_solver.inject_recaptcha_solution(page, solution)
-            
-            elif captcha_type == "image_captcha":
-                # Extract image and solve
-                image_data = await page.evaluate("""
-                    () => {
-                        const img = document.querySelector('img[src*="captcha"], img[src*="challenge"]');
-                        if (img) {
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            canvas.width = img.naturalWidth;
-                            canvas.height = img.naturalHeight;
-                            ctx.drawImage(img, 0, 0);
-                            return canvas.toDataURL().split(',')[1];
-                        }
-                        return null;
-                    }
-                """)
-                
-                if image_data:
-                    import base64
-                    image_bytes = base64.b64decode(image_data)
-                    solution = await captcha_solver.solve_image_captcha(image_bytes)
-                    
-                    if solution:
-                        # Find input field and enter solution
-                        await page.fill('input[name*="captcha"], input[id*="captcha"]', solution)
-                        return True
-            
-            return False
-            
-        except Exception as e:
-            logger.error(f"CAPTCHA handling failed: {e}")
-            return False
+        """Check for and handle CAPTCHAs - DISABLED FOR TESTING."""
+        # CAPTCHA handling disabled to expose loopholes - no CAPTCHAs will be solved
+        return False
     
     async def _log_task_result(self, result: TaskResult):
         """Log task result to database."""

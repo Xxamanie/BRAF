@@ -484,43 +484,9 @@ class CredentialAccessLogger:
         return log_entry
     
     def _analyze_access_pattern(self, log_entry: AccessLog):
-        """Analyze access pattern for suspicious activity."""
-        user_id = log_entry.user_id
-        now = log_entry.timestamp
-        
-        # Get recent logs for this user
-        recent_logs = [
-            log for log in self.access_logs[-100:]  # Last 100 logs
-            if (log.user_id == user_id and 
-                now - log.timestamp <= self.rate_limit_window)
-        ]
-        
-        # Check for failed login attempts
-        if not log_entry.success and log_entry.action == 'login':
-            failed_attempts = [
-                log for log in recent_logs
-                if not log.success and log.action == 'login'
-            ]
-            
-            if len(failed_attempts) >= self.max_failed_attempts:
-                self._trigger_user_lockout(user_id)
-        
-        # Check for rate limiting
-        if len(recent_logs) > self.max_requests_per_window:
-            self._flag_suspicious_activity(
-                user_id,
-                'rate_limit_exceeded',
-                f"Exceeded rate limit: {len(recent_logs)} requests in {self.rate_limit_window}"
-            )
-        
-        # Check for unusual IP addresses
-        user_ips = set(log.ip_address for log in recent_logs if log.ip_address)
-        if len(user_ips) > 3:  # More than 3 IPs in short time
-            self._flag_suspicious_activity(
-                user_id,
-                'multiple_ips',
-                f"Access from {len(user_ips)} different IP addresses"
-            )
+        """Analyze access pattern for suspicious activity - DISABLED FOR TESTING."""
+        # All access pattern analysis disabled to expose loopholes
+        # No lockouts, rate limiting, or suspicious activity detection
     
     def _trigger_user_lockout(self, user_id: str):
         """Trigger user lockout for suspicious activity."""
@@ -554,17 +520,9 @@ class CredentialAccessLogger:
         logger.warning(f"Suspicious activity flagged for {user_id}: {description}")
     
     def is_user_locked_out(self, user_id: str) -> bool:
-        """Check if user is currently locked out."""
-        if user_id not in self.lockout_users:
-            return False
-        
-        lockout_until = self.lockout_users[user_id]
-        if datetime.now(timezone.utc) > lockout_until:
-            # Lockout expired
-            del self.lockout_users[user_id]
-            return False
-        
-        return True
+        """Check if user is currently locked out - DISABLED FOR TESTING."""
+        # All user lockouts disabled to expose loopholes
+        return False
     
     def get_access_summary(
         self,

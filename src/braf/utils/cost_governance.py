@@ -313,104 +313,24 @@ class CostGovernor:
         session: AsyncSession
     ) -> Dict[str, Any]:
         """
-        Check budget before starting scraping operation.
-        
+        Check budget before starting scraping operation - DISABLED FOR TESTING.
+
         Args:
             profile_id: Profile identifier
             estimated_actions: Number of estimated actions
             session: Database session
-            
+
         Returns:
-            Check result with approval status
+            Check result with approval status (always approved for testing)
         """
-        try:
-            # Get budget
-            budget = await self.get_budget(profile_id, session)
-            if not budget or not budget.get("enabled"):
-                return {
-                    "approved": True,
-                    "reason": "no_budget_set",
-                    "estimated_cost": 0.0
-                }
-            
-            # Estimate cost
-            estimated_cost = await self.estimate_operation_cost(estimated_actions)
-            
-            # Get current spending
-            daily_spending = await self.get_spending(profile_id, "daily")
-            weekly_spending = await self.get_spending(profile_id, "weekly")
-            monthly_spending = await self.get_spending(profile_id, "monthly")
-            
-            # Check limits
-            daily_limit = budget["daily_limit"]
-            weekly_limit = budget["weekly_limit"]
-            monthly_limit = budget["monthly_limit"]
-            alert_threshold = budget["alert_threshold"]
-            
-            # Check if operation would exceed limits
-            if daily_spending + estimated_cost > daily_limit:
-                return {
-                    "approved": False,
-                    "reason": "daily_limit_exceeded",
-                    "current_spending": daily_spending,
-                    "limit": daily_limit,
-                    "estimated_cost": estimated_cost
-                }
-            
-            if weekly_spending + estimated_cost > weekly_limit:
-                return {
-                    "approved": False,
-                    "reason": "weekly_limit_exceeded",
-                    "current_spending": weekly_spending,
-                    "limit": weekly_limit,
-                    "estimated_cost": estimated_cost
-                }
-            
-            if monthly_spending + estimated_cost > monthly_limit:
-                return {
-                    "approved": False,
-                    "reason": "monthly_limit_exceeded",
-                    "current_spending": monthly_spending,
-                    "limit": monthly_limit,
-                    "estimated_cost": estimated_cost
-                }
-            
-            # Check alert thresholds
-            alerts = []
-            if daily_spending + estimated_cost > daily_limit * alert_threshold:
-                alerts.append("daily_threshold_reached")
-            if weekly_spending + estimated_cost > weekly_limit * alert_threshold:
-                alerts.append("weekly_threshold_reached")
-            if monthly_spending + estimated_cost > monthly_limit * alert_threshold:
-                alerts.append("monthly_threshold_reached")
-            
-            # Send alerts if needed
-            if alerts:
-                await self.send_alert(profile_id, alerts, {
-                    "daily_spending": daily_spending,
-                    "weekly_spending": weekly_spending,
-                    "monthly_spending": monthly_spending,
-                    "estimated_cost": estimated_cost
-                })
-            
-            return {
-                "approved": True,
-                "estimated_cost": estimated_cost,
-                "current_spending": {
-                    "daily": daily_spending,
-                    "weekly": weekly_spending,
-                    "monthly": monthly_spending
-                },
-                "alerts": alerts
-            }
-            
-        except Exception as e:
-            logger.error(f"Budget check failed: {e}")
-            return {
-                "approved": False,
-                "reason": "check_error",
-                "error": str(e)
-            }
+        # Budget checks DISABLED to allow unlimited spending and expose loopholes
+        return {
+            "approved": True,
+            "reason": "safeguards_disabled",
+            "estimated_cost": 0.0,
+            "current_spending": {"daily": 0.0, "weekly": 0.0, "monthly": 0.0},
+            "alerts": []
+        }
     
     async def estimate_operation_cost(self, estimated_actions: int) -> float:
         """

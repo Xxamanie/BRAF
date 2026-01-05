@@ -51,9 +51,92 @@ class DistributedBotNetwork:
         self.min_nodes_per_region = 3
         self.max_nodes_per_region = 50
 
-        # Cloud credentials
-        # self.aws_session = boto3.Session()  # Optional
-        # self.azure_credential = DefaultAzureCredential()  # Optional
+        # Cloud provider configurations
+        self.provider_configs = {
+            'aws': {
+                'instance_type': 't3.medium',
+                'ami_id': 'ami-0abcdef1234567890',
+                'security_group': 'sg-botnetwork',
+                'key_name': 'bot-network-key',
+                'cost_per_hour': 0.0416,  # t3.medium hourly cost
+                'max_concurrent_deployments': 10
+            },
+            'azure': {
+                'vm_size': 'Standard_B2s',
+                'image_publisher': 'Canonical',
+                'image_offer': 'Ubuntu2204',
+                'image_sku': '22.04-LTS',
+                'cost_per_hour': 0.026,  # B2s hourly cost
+                'max_concurrent_deployments': 8
+            },
+            'gcp': {
+                'machine_type': 'e2-medium',
+                'image_project': 'ubuntu-os-cloud',
+                'image_family': 'ubuntu-2204-lts',
+                'cost_per_hour': 0.033,  # e2-medium hourly cost
+                'max_concurrent_deployments': 12
+            },
+            'digitalocean': {
+                'droplet_size': 's-1vcpu-1gb',
+                'image_slug': 'ubuntu-22-04-x64',
+                'cost_per_hour': 0.0085,  # Basic droplet hourly cost
+                'max_concurrent_deployments': 5
+            }
+        }
+
+        # Initialize cloud SDK clients
+        self._initialize_cloud_clients()
+
+    def _initialize_cloud_clients(self):
+        """Initialize cloud provider SDK clients"""
+        try:
+            # AWS SDK initialization
+            import boto3
+            self.aws_client = boto3.client('ec2')
+            self.aws_pricing = boto3.client('pricing', region_name='us-east-1')
+            logger.info("AWS SDK initialized")
+        except ImportError:
+            logger.warning("AWS SDK not available - install boto3")
+            self.aws_client = None
+        except Exception as e:
+            logger.error(f"AWS SDK initialization failed: {e}")
+            self.aws_client = None
+
+        try:
+            # Azure SDK initialization
+            from azure.identity import DefaultAzureCredential
+            from azure.mgmt.compute import ComputeManagementClient
+            from azure.mgmt.resource import ResourceManagementClient
+
+            self.azure_credential = DefaultAzureCredential()
+            self.azure_compute_client = ComputeManagementClient(self.azure_credential, "subscription-id")
+            self.azure_resource_client = ResourceManagementClient(self.azure_credential, "subscription-id")
+            logger.info("Azure SDK initialized")
+        except ImportError:
+            logger.warning("Azure SDK not available - install azure-identity azure-mgmt-compute")
+            self.azure_credential = None
+        except Exception as e:
+            logger.error(f"Azure SDK initialization failed: {e}")
+            self.azure_credential = None
+
+        try:
+            # GCP SDK initialization
+            from google.cloud import compute_v1
+            self.gcp_compute_client = compute_v1.InstancesClient()
+            logger.info("GCP SDK initialized")
+        except ImportError:
+            logger.warning("GCP SDK not available - install google-cloud-compute")
+            self.gcp_compute_client = None
+        except Exception as e:
+            logger.error(f"GCP SDK initialization failed: {e}")
+            self.gcp_compute_client = None
+
+        # DigitalOcean API client (simplified)
+        self.do_api_token = os.getenv('DO_API_TOKEN')
+        if self.do_api_token:
+            logger.info("DigitalOcean API configured")
+        else:
+            logger.warning("DigitalOcean API token not configured")
 
     async def initialize_network(self):
         """Initialize the distributed network"""
@@ -80,10 +163,25 @@ class DistributedBotNetwork:
             await self.deploy_node(region, provider)
 
     async def deploy_node(self, region: str, provider: str) -> Optional[BotNode]:
-        """Deploy a new bot node in specified region"""
+        """Deploy a new bot node in specified region with cost tracking"""
         try:
+            # Check deployment limits for provider
+            config = self.provider_configs[provider]
+            current_deployments = len([n for n in self.nodes.values()
+                                     if n.provider == provider and n.status in ['active', 'pending']])
+
+            if current_deployments >= config['max_concurrent_deployments']:
+                logger.warning(f"Deployment limit reached for {provider}")
+                return None
+
+            # Check budget constraints
+            if not await self._check_budget_constraints(provider, region):
+                logger.warning(f"Budget constraints prevent deployment on {provider} in {region}")
+                return None
+
             node_id = f"{provider}-{region}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
 
+            # Deploy based on provider
             if provider == 'aws':
                 instance = await self._deploy_aws_instance(region, node_id)
             elif provider == 'azure':
@@ -93,62 +191,347 @@ class DistributedBotNetwork:
             else:
                 instance = await self._deploy_digitalocean_instance(region, node_id)
 
+            if not instance:
+                return None
+
+            # Create node with cost tracking
             node = BotNode(
                 node_id=node_id,
                 region=region,
                 provider=provider,
-                instance_type='t3.medium',  # Cost-effective for bots
+                instance_type=config.get(f'{provider}_instance_type',
+                                       config.get('instance_type', 'standard')),
                 ip_address=instance['ip_address'],
                 status='active',
                 last_heartbeat=datetime.now(timezone.utc),
                 active_sessions=0,
-                max_sessions=100,  # 100 concurrent sessions per node
+                max_sessions=100,
                 earnings_today=0.0,
                 uptime=0.0
             )
 
+            # Track deployment cost
+            await self._track_deployment_cost(node, instance)
+
             self.nodes[node_id] = node
             await self._register_node(node)
 
-            logger.info(f"Deployed bot node {node_id} in {region}")
+            logger.info(f"Deployed bot node {node_id} in {region} (Cost: ${instance.get('hourly_cost', 0):.4f}/hr)")
             return node
 
         except Exception as e:
             logger.error(f"Failed to deploy node in {region}: {e}")
             return None
 
+    async def _track_deployment_cost(self, node: BotNode, instance: Dict[str, Any]):
+        """Track deployment costs for cost optimization"""
+        try:
+            cost_data = {
+                'node_id': node.node_id,
+                'provider': node.provider,
+                'region': node.region,
+                'instance_type': instance.get('instance_type', node.instance_type),
+                'hourly_cost': instance.get('hourly_cost', 0),
+                'deployment_time': datetime.now(timezone.utc).isoformat(),
+                'spot_instance': instance.get('spot_instance', False)
+            }
+
+            # Store cost data in Redis for monitoring
+            await self.redis_client.hset('deployment_costs', node.node_id, json.dumps(cost_data))
+
+            # Update total cost tracking
+            total_cost_key = f"total_cost_{node.provider}_{node.region}"
+            current_total = float(await self.redis_client.get(total_cost_key) or 0)
+            await self.redis_client.set(total_cost_key, current_total + cost_data['hourly_cost'])
+
+        except Exception as e:
+            logger.error(f"Cost tracking failed for {node.node_id}: {e}")
+
+    async def terminate_node(self, node_id: str):
+        """Terminate a bot node with proper cleanup and cost tracking"""
+        if node_id not in self.nodes:
+            return
+
+        node = self.nodes[node_id]
+
+        try:
+            # Calculate uptime and costs before termination
+            uptime_hours = node.uptime
+            cost_data = await self.redis_client.hget('deployment_costs', node_id)
+            if cost_data:
+                cost_info = json.loads(cost_data)
+                total_cost = uptime_hours * cost_info['hourly_cost']
+                logger.info(f"Node {node_id} cost: ${total_cost:.4f} for {uptime_hours:.2f} hours")
+
+            # Terminate based on provider
+            success = False
+            if node.provider == 'aws':
+                success = await self._terminate_aws_instance(node.region, node.node_id)
+            elif node.provider == 'azure':
+                success = await self._terminate_azure_instance(node.region, node.node_id)
+            elif node.provider == 'gcp':
+                success = await self._terminate_gcp_instance(node.region, node.node_id)
+            else:
+                success = await self._terminate_digitalocean_instance(node.region, node.node_id)
+
+            if success:
+                # Update cost tracking
+                total_cost_key = f"total_cost_{node.provider}_{node.region}"
+                current_total = float(await self.redis_client.get(total_cost_key) or 0)
+                cost_info = json.loads(cost_data) if cost_data else {'hourly_cost': 0}
+                await self.redis_client.set(total_cost_key,
+                                          current_total - cost_info['hourly_cost'])
+
+                # Clean up tracking data
+                await self.redis_client.hdel('deployment_costs', node_id)
+                await self.redis_client.hdel('bot_nodes', node_id)
+
+                node.status = 'terminated'
+                del self.nodes[node_id]
+
+                logger.info(f"Terminated bot node {node_id}")
+            else:
+                logger.error(f"Failed to terminate {node_id}")
+
+        except Exception as e:
+            logger.error(f"Termination failed for {node_id}: {e}")
+            # Mark as failed but don't delete from tracking
+            node.status = 'termination_failed'
+
+    async def _terminate_aws_instance(self, region: str, instance_id: str) -> bool:
+        """Terminate AWS instance with error handling"""
+        try:
+            if not self.aws_client:
+                logger.error("AWS client not available for termination")
+                return False
+
+            ec2 = boto3.client('ec2', region_name=region)
+
+            # Terminate instance
+            response = ec2.terminate_instances(InstanceIds=[instance_id])
+
+            # Wait for termination
+            waiter = ec2.get_waiter('instance_terminated')
+            waiter.wait(
+                InstanceIds=[instance_id],
+                WaiterConfig={'Delay': 5, 'MaxAttempts': 24}  # 2min timeout
+            )
+
+            logger.info(f"AWS instance {instance_id} terminated successfully")
+            return True
+
+        except Exception as e:
+            logger.error(f"AWS termination failed for {instance_id}: {e}")
+            return False
+
+    async def get_cost_analysis(self) -> Dict[str, Any]:
+        """Get comprehensive cost analysis across all providers and regions"""
+        try:
+            cost_analysis = {
+                'total_hourly_cost': 0.0,
+                'cost_by_provider': {},
+                'cost_by_region': {},
+                'active_instances': len([n for n in self.nodes.values() if n.status == 'active']),
+                'total_instances': len(self.nodes),
+                'cost_efficiency_score': 0.0
+            }
+
+            # Calculate costs by provider and region
+            for node in self.nodes.values():
+                if node.status == 'active':
+                    cost_data = await self.redis_client.hget('deployment_costs', node.node_id)
+                    if cost_data:
+                        cost_info = json.loads(cost_data)
+                        hourly_cost = cost_info.get('hourly_cost', 0)
+
+                        # Provider costs
+                        if node.provider not in cost_analysis['cost_by_provider']:
+                            cost_analysis['cost_by_provider'][node.provider] = 0.0
+                        cost_analysis['cost_by_provider'][node.provider] += hourly_cost
+
+                        # Region costs
+                        region_key = f"{node.provider}-{node.region}"
+                        if region_key not in cost_analysis['cost_by_region']:
+                            cost_analysis['cost_by_region'][region_key] = 0.0
+                        cost_analysis['cost_by_region'][region_key] += hourly_cost
+
+                        cost_analysis['total_hourly_cost'] += hourly_cost
+
+            # Calculate cost efficiency (lower is better)
+            if cost_analysis['active_instances'] > 0:
+                avg_cost_per_instance = cost_analysis['total_hourly_cost'] / cost_analysis['active_instances']
+                # Efficiency score: lower cost per instance = higher efficiency
+                cost_analysis['cost_efficiency_score'] = max(0, 100 - (avg_cost_per_instance * 100))
+
+            return cost_analysis
+
+        except Exception as e:
+            logger.error(f"Cost analysis failed: {e}")
+            return {'error': str(e)}
+
+    async def optimize_costs(self) -> Dict[str, Any]:
+        """Optimize costs by terminating expensive instances and using cheaper alternatives"""
+        try:
+            optimizations = {
+                'terminated_expensive_instances': [],
+                'switched_to_spot_instances': [],
+                'regional_optimizations': [],
+                'total_savings_hourly': 0.0
+            }
+
+            # Find expensive instances to terminate
+            cost_analysis = await self.get_cost_analysis()
+            avg_cost = cost_analysis['total_hourly_cost'] / max(cost_analysis['active_instances'], 1)
+
+            for node in self.nodes.values():
+                if node.status == 'active':
+                    cost_data = await self.redis_client.hget('deployment_costs', node.node_id)
+                    if cost_data:
+                        cost_info = json.loads(cost_data)
+                        node_cost = cost_info.get('hourly_cost', 0)
+
+                        # If instance is >50% more expensive than average, consider termination
+                        if node_cost > avg_cost * 1.5:
+                            await self.terminate_node(node.node_id)
+                            optimizations['terminated_expensive_instances'].append({
+                                'node_id': node.node_id,
+                                'hourly_cost': node_cost,
+                                'region': node.region
+                            })
+                            optimizations['total_savings_hourly'] += node_cost
+
+            # Suggest regional optimizations (pseudo-code for actual implementation)
+            optimizations['regional_optimizations'] = [
+                "Consider moving US-West-2 instances to US-East-1 for lower latency",
+                "Evaluate spot instance usage for cost reduction",
+                "Consider reserved instances for long-running deployments"
+            ]
+
+            logger.info(f"Cost optimization completed: ${optimizations['total_savings_hourly']:.4f}/hr savings")
+            return optimizations
+
+        except Exception as e:
+            logger.error(f"Cost optimization failed: {e}")
+            return {'error': str(e)}
+
+    async def _check_budget_constraints(self, provider: str, region: str) -> bool:
+        """Check if deployment fits within budget constraints"""
+        try:
+            config = self.provider_configs[provider]
+
+            # Calculate current spending
+            current_cost_per_hour = sum(
+                config['cost_per_hour'] for node in self.nodes.values()
+                if node.provider == provider and node.status == 'active'
+            )
+
+            # Check against budget (example: $100/hour max per provider)
+            max_budget_per_provider = float(os.getenv('MAX_BUDGET_PER_PROVIDER', '100.0'))
+            projected_cost = current_cost_per_hour + config['cost_per_hour']
+
+            if projected_cost > max_budget_per_provider:
+                return False
+
+            # Regional cost optimization
+            regional_cost = sum(
+                self.provider_configs[n.provider]['cost_per_hour']
+                for n in self.nodes.values()
+                if n.region == region and n.status == 'active'
+            )
+
+            # Prefer lower cost regions
+            return True
+
+        except Exception as e:
+            logger.error(f"Budget check failed: {e}")
+            return True  # Allow deployment on error
+
     async def _deploy_aws_instance(self, region: str, node_id: str) -> Dict[str, Any]:
-        """Deploy AWS EC2 instance"""
-        # ec2 = self.aws_session.client('ec2', region_name=region)  # Optional
+        """Deploy AWS EC2 instance with proper error handling and cost tracking"""
+        if not self.aws_client:
+            logger.error("AWS client not initialized")
+            return None
 
-        response = ec2.run_instances(
-            ImageId='ami-0abcdef1234567890',  # Ubuntu AMI
-            MinCount=1,
-            MaxCount=1,
-            InstanceType='t3.medium',
-            KeyName='bot-network-key',
-            SecurityGroupIds=['sg-botnetwork'],
-            TagSpecifications=[{
-                'ResourceType': 'instance',
-                'Tags': [
-                    {'Key': 'Name', 'Value': f'braf-bot-{node_id}'},
-                    {'Key': 'Purpose', 'Value': 'distributed-bot-network'}
-                ]
-            }],
-            UserData=self._get_userdata_script()
-        )
+        try:
+            # Create EC2 client for specific region
+            ec2 = boto3.client('ec2', region_name=region)
+            config = self.provider_configs['aws']
 
-        instance_id = response['Instances'][0]['InstanceId']
+            # Prepare instance configuration
+            instance_config = {
+                'ImageId': config['ami_id'],
+                'MinCount': 1,
+                'MaxCount': 1,
+                'InstanceType': config['instance_type'],
+                'KeyName': config.get('key_name', 'bot-network-key'),
+                'SecurityGroupIds': [config.get('security_group', 'sg-botnetwork')],
+                'TagSpecifications': [{
+                    'ResourceType': 'instance',
+                    'Tags': [
+                        {'Key': 'Name', 'Value': f'braf-bot-{node_id}'},
+                        {'Key': 'Purpose', 'Value': 'distributed-bot-network'},
+                        {'Key': 'ManagedBy', 'Value': 'braf-controller'},
+                        {'Key': 'Environment', 'Value': 'production'}
+                    ]
+                }],
+                'UserData': self._get_userdata_script(),
+                # Enable detailed monitoring for cost tracking
+                'Monitoring': {'Enabled': True},
+                # Use spot instances for cost optimization when possible
+                'InstanceMarketOptions': {
+                    'MarketType': 'spot',
+                    'SpotOptions': {
+                        'MaxPrice': str(config['cost_per_hour'] * 1.5),  # Max 50% above on-demand
+                        'SpotInstanceType': 'one-time'
+                    }
+                } if os.getenv('USE_SPOT_INSTANCES', 'true').lower() == 'true' else {}
+            }
 
-        # Wait for instance to be running
-        waiter = ec2.get_waiter('instance_running')
-        waiter.wait(InstanceIds=[instance_id])
+            # Deploy instance
+            response = ec2.run_instances(**instance_config)
+            instance_id = response['Instances'][0]['InstanceId']
 
-        # Get public IP
-        instances = ec2.describe_instances(InstanceIds=[instance_id])
-        ip_address = instances['Reservations'][0]['Instances'][0]['PublicIpAddress']
+            # Wait for instance to be running with timeout
+            waiter = ec2.get_waiter('instance_running')
+            waiter.wait(
+                InstanceIds=[instance_id],
+                WaiterConfig={'Delay': 5, 'MaxAttempts': 60}  # 5min timeout
+            )
 
-        return {'instance_id': instance_id, 'ip_address': ip_address}
+            # Get instance details
+            instances = ec2.describe_instances(InstanceIds=[instance_id])
+            instance = instances['Reservations'][0]['Instances'][0]
+            ip_address = instance.get('PublicIpAddress')
+
+            if not ip_address:
+                # Wait a bit more for IP assignment
+                await asyncio.sleep(10)
+                instances = ec2.describe_instances(InstanceIds=[instance_id])
+                instance = instances['Reservations'][0]['Instances'][0]
+                ip_address = instance.get('PublicIpAddress')
+
+            if not ip_address:
+                raise Exception("Instance deployed but no public IP assigned")
+
+            return {
+                'instance_id': instance_id,
+                'ip_address': ip_address,
+                'instance_type': config['instance_type'],
+                'hourly_cost': config['cost_per_hour'],
+                'region': region,
+                'spot_instance': bool(instance_config.get('InstanceMarketOptions'))
+            }
+
+        except Exception as e:
+            logger.error(f"AWS deployment failed: {e}")
+            # Attempt cleanup if instance was created
+            if 'instance_id' in locals():
+                try:
+                    ec2.terminate_instances(InstanceIds=[instance_id])
+                    logger.info(f"Cleaned up failed instance {instance_id}")
+                except:
+                    pass
+            return None
 
     async def _deploy_azure_instance(self, region: str, node_id: str) -> Dict[str, Any]:
         """Deploy Azure VM instance"""
