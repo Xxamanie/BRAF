@@ -1,0 +1,22 @@
+# Railway Environment Variables for BRAF Deployment
+# Copy these to Railway project settings under Variables tab
+
+# Required Secrets (Generate secure random values)
+SECRET_KEY=your-256-bit-production-secret-key-here
+ENCRYPTION_KEY=your-256-bit-encryption-key-here
+JWT_SECRET_KEY=your-jwt-secret-key-here
+POSTGRES_PASSWORD=your_secure_postgres_password
+
+# MAXEL Integration (from .env.production)
+MAXEL_API_KEY=pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsW
+MAXEL_SECRET_KEY=sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0
+
+# Optional for Testing (add if needed)
+PROXY_USERNAME=your_proxy_username
+PROXY_PASSWORD=your_proxy_password
+CAPTCHA_API_KEY=your_2captcha_api_key
+
+# Railway Auto-Provides:
+# DATABASE_URL (from Postgres plugin)
+# REDIS_URL (from Redis plugin)
+# RAILWAY_STATIC_URL (auto-generated domain)

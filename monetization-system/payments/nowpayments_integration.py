@@ -22,13 +22,17 @@ class NOWPaymentsIntegration:
     """
     
     def __init__(self):
+        # Your provided NOWPayments credentials
         self.api_key = os.getenv('NOWPAYMENTS_API_KEY', 'RD7WEXF-QTW4N7P-HMV12F9-MPANF4G')
+        self.secret_key = os.getenv('NOWPAYMENTS_SECRET', 'LkHb3f6xGytVhZmQb+nUOruBpHOBuxQS')
+        self.public_key = os.getenv('NOWPAYMENTS_PUBLIC_KEY', '873fe679-cf92-46c7-8f1c-55fe44a4009a')
+
         self.base_url = os.getenv('NOWPAYMENTS_BASE_URL', 'https://api.nowpayments.io/v1')
         self.sandbox = os.getenv('NOWPAYMENTS_SANDBOX', 'false').lower() == 'true'
-        
+
         if self.sandbox:
             self.base_url = 'https://api-sandbox.nowpayments.io/v1'
-        
+
         self.headers = {
             'x-api-key': self.api_key,
             'Content-Type': 'application/json'
