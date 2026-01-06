@@ -1,33 +1,33 @@
 #!/usr/bin/env python3
 """
-Get Your MAXEL Wallet Deposit Address
-Use this to deposit real cryptocurrency into your MAXEL wallet
+Get Your maxelpay Wallet Deposit Address
+Use this to deposit real cryptocurrency into your maxelpay wallet
 """
 import requests
 import json
 from datetime import datetime
 
-# MAXEL API Configuration
-MAXEL_API_KEY = "pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXEL_SECRET_KEY"
-MAXEL_SECRET_KEY = "sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0"
+# maxelpay API Configuration
+MAXELPAY_API_KEY = "pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXELPAY_SECRET_KEY"
+MAXELPAY_SECRET_KEY = "sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0"
 
-def get_maxel_deposit_address(currency='USDT'):
+def get_MAXELPAY_deposit_address(currency='USDT'):
     """
-    Get your MAXEL wallet deposit address for a specific cryptocurrency
+    Get your maxelpay wallet deposit address for a specific cryptocurrency
     """
-    print(f"🔑 Getting MAXEL Deposit Address for {currency}")
+    print(f"🔑 Getting maxelpay Deposit Address for {currency}")
     print("=" * 60)
     
     headers = {
-        'Authorization': f'Bearer {MAXEL_API_KEY}',
-        'X-Secret-Key': MAXEL_SECRET_KEY,
+        'Authorization': f'Bearer {MAXELPAY_API_KEY}',
+        'X-Secret-Key': MAXELPAY_SECRET_KEY,
         'Content-Type': 'application/json'
     }
     
-    # Try to get deposit address from MAXEL API
+    # Try to get deposit address from maxelpay API
     try:
         # Method 1: Create new address
-        url = "https://maxel.io/api/v1/addresses"
+        url = "https://maxelpay.com/api/v1/addresses"
         data = {
             'currency': currency,
             'user_id': 'braf_main_user'
@@ -65,7 +65,7 @@ def get_maxel_deposit_address(currency='USDT'):
                 return result['address']
         
         # Method 2: Get existing addresses
-        url = "https://maxel.io/api/v1/account/addresses"
+        url = "https://maxelpay.com/api/v1/account/addresses"
         response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
@@ -84,7 +84,7 @@ def get_maxel_deposit_address(currency='USDT'):
     # Fallback: Manual instructions
     print(f"\n📱 Manual Method:")
     print(f"=" * 60)
-    print(f"1. Login to MAXEL: https://maxel.io/login")
+    print(f"1. Login to maxelpay: https://maxelpay.com/login")
     print(f"2. Go to 'Wallet' or 'Deposit' section")
     print(f"3. Select {currency}")
     print(f"4. Click 'Deposit' or 'Receive'")
@@ -95,7 +95,7 @@ def get_maxel_deposit_address(currency='USDT'):
 
 def show_deposit_instructions():
     """Show detailed deposit instructions"""
-    print(f"\n💰 How to Get Real Money into MAXEL Wallet")
+    print(f"\n💰 How to Get Real Money into maxelpay Wallet")
     print("=" * 60)
     
     print(f"\n📋 Step-by-Step Guide:")
@@ -109,8 +109,8 @@ def show_deposit_instructions():
     print(f"   Option C: Transfer from Another Wallet")
     print(f"      - Move crypto from existing wallet")
     
-    print(f"\n2️⃣  Get Your MAXEL Deposit Address")
-    print(f"   - Login to MAXEL")
+    print(f"\n2️⃣  Get Your maxelpay Deposit Address")
+    print(f"   - Login to maxelpay")
     print(f"   - Go to Wallet → Deposit")
     print(f"   - Select cryptocurrency (USDT recommended)")
     print(f"   - Copy deposit address")
@@ -118,34 +118,34 @@ def show_deposit_instructions():
     print(f"\n3️⃣  Send Cryptocurrency")
     print(f"   - Go to your exchange/wallet")
     print(f"   - Select 'Send' or 'Withdraw'")
-    print(f"   - Paste MAXEL deposit address")
+    print(f"   - Paste maxelpay deposit address")
     print(f"   - Enter amount")
     print(f"   - Confirm transaction")
     
     print(f"\n4️⃣  Wait for Confirmation")
     print(f"   - Transaction processes on blockchain")
     print(f"   - Usually 1-60 minutes depending on crypto")
-    print(f"   - Check MAXEL wallet for balance update")
+    print(f"   - Check maxelpay wallet for balance update")
     
     print(f"\n✅ Once Confirmed:")
-    print(f"   - Money appears in MAXEL wallet")
+    print(f"   - Money appears in maxelpay wallet")
     print(f"   - You can use it for withdrawals")
     print(f"   - You can send to other addresses")
     print(f"   - You can convert to other cryptocurrencies")
 
-def check_maxel_balance():
-    """Check current MAXEL wallet balance"""
-    print(f"\n💼 Checking MAXEL Wallet Balance")
+def check_MAXELPAY_balance():
+    """Check current maxelpay wallet balance"""
+    print(f"\n💼 Checking maxelpay Wallet Balance")
     print("=" * 60)
     
     headers = {
-        'Authorization': f'Bearer {MAXEL_API_KEY}',
-        'X-Secret-Key': MAXEL_SECRET_KEY,
+        'Authorization': f'Bearer {MAXELPAY_API_KEY}',
+        'X-Secret-Key': MAXELPAY_SECRET_KEY,
         'Content-Type': 'application/json'
     }
     
     try:
-        url = "https://maxel.io/api/v1/account/balance"
+        url = "https://maxelpay.com/api/v1/account/balance"
         response = requests.get(url, headers=headers, timeout=10)
         
         if response.status_code == 200:
@@ -175,17 +175,17 @@ def check_maxel_balance():
         print(f"❌ Error checking balance: {e}")
     
     print(f"\n💡 To check balance manually:")
-    print(f"   Login to: https://maxel.io/dashboard")
+    print(f"   Login to: https://maxelpay.com/dashboard")
     print(f"   View your wallet balances there")
 
 def main():
     """Main function"""
-    print(f"🚀 MAXEL Wallet Deposit Tool")
+    print(f"🚀 maxelpay Wallet Deposit Tool")
     print("=" * 60)
     print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # Check current balance
-    check_maxel_balance()
+    check_MAXELPAY_balance()
     
     # Get deposit addresses for popular cryptocurrencies
     print(f"\n" + "=" * 60)
@@ -193,7 +193,7 @@ def main():
     
     for currency in currencies:
         print(f"\n")
-        get_maxel_deposit_address(currency)
+        get_MAXELPAY_deposit_address(currency)
         print(f"\n" + "-" * 60)
     
     # Show detailed instructions
@@ -202,10 +202,10 @@ def main():
     print(f"\n" + "=" * 60)
     print(f"🎯 Summary:")
     print(f"   1. BRAF earnings are currently simulated (not real money)")
-    print(f"   2. To get real money in MAXEL, you need to deposit crypto")
-    print(f"   3. Buy crypto on exchange → Send to MAXEL address → Money appears")
-    print(f"   4. Or earn crypto from real work → Send to MAXEL address")
-    print(f"\n💡 MAXEL Dashboard: https://maxel.io/dashboard")
+    print(f"   2. To get real money in maxelpay, you need to deposit crypto")
+    print(f"   3. Buy crypto on exchange → Send to maxelpay address → Money appears")
+    print(f"   4. Or earn crypto from real work → Send to maxelpay address")
+    print(f"\n💡 maxelpay Dashboard: https://maxelpay.com/dashboard")
 
 if __name__ == "__main__":
     main()

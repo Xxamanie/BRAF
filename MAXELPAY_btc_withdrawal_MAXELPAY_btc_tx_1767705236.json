@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "transaction_id": "MAXELPAY_btc_tx_1767705236",
+  "status": "pending",
+  "amount_btc": 6.0,
+  "amount_usd": 562770.0,
+  "fee_btc": 0.09,
+  "net_amount_btc": 5.91,
+  "recipient_address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+  "estimated_confirmation_time": "30-60 minutes",
+  "network": "Bitcoin",
+  "exchange_rate": 93795,
+  "timestamp": "2026-01-06T14:13:56.477545"
+}

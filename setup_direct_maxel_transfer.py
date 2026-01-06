@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Setup Direct MAXEL Transfer - Convert Simulated to Real
-This creates a bridge between BRAF earnings and real MAXEL deposits
+Setup Direct maxelpay Transfer - Convert Simulated to Real
+This creates a bridge between BRAF earnings and real maxelpay deposits
 """
 import json
 import os
 from datetime import datetime
 
 def create_real_transfer_system():
-    """Create system to convert BRAF earnings to real MAXEL deposits"""
-    print("SETUP DIRECT MAXEL TRANSFER SYSTEM")
+    """Create system to convert BRAF earnings to real maxelpay deposits"""
+    print("SETUP DIRECT maxelpay TRANSFER SYSTEM")
     print("=" * 50)
     
     # Read current BRAF earnings
@@ -29,18 +29,18 @@ def create_real_transfer_system():
     # Create transfer configuration
     transfer_config = {
         "transfer_mode": "manual_deposit_required",
-        "explanation": "BRAF earnings are simulated. To get real money in MAXEL, you must deposit real cryptocurrency.",
+        "explanation": "BRAF earnings are simulated. To get real money in maxelpay, you must deposit real cryptocurrency.",
         "current_braf_earnings": current_earnings,
-        "maxel_wallet_balance": 0.0,
+        "MAXELPAY_wallet_balance": 0.0,
         "transfer_methods": {
             "instant_deposit": {
-                "description": "Buy crypto and deposit to MAXEL",
+                "description": "Buy crypto and deposit to maxelpay",
                 "time": "15-30 minutes",
                 "steps": [
-                    "Login to MAXEL: https://maxel.io/login",
+                    "Login to maxelpay: https://maxelpay.com/login",
                     "Get deposit address: Wallet -> Deposit -> USDT",
                     "Buy crypto: https://coinbase.com",
-                    "Send to MAXEL address",
+                    "Send to maxelpay address",
                     "Wait for confirmation"
                 ]
             },
@@ -67,10 +67,10 @@ def create_real_transfer_system():
     
     # Save configuration
     os.makedirs('config', exist_ok=True)
-    with open('config/maxel_transfer_config.json', 'w') as f:
+    with open('config/MAXELPAY_transfer_config.json', 'w') as f:
         json.dump(transfer_config, f, indent=2)
     
-    print(f"✅ Transfer configuration saved: config/maxel_transfer_config.json")
+    print(f"✅ Transfer configuration saved: config/MAXELPAY_transfer_config.json")
     
     return transfer_config
 
@@ -79,14 +79,14 @@ def create_deposit_tracker():
     
     tracker_script = '''#!/usr/bin/env python3
 """
-MAXEL Deposit Tracker
+maxelpay Deposit Tracker
 Track real deposits vs BRAF simulated earnings
 """
 import json
 from datetime import datetime
 
 def check_balances():
-    """Check BRAF vs MAXEL balances"""
+    """Check BRAF vs maxelpay balances"""
     print("BALANCE COMPARISON")
     print("=" * 40)
     
@@ -99,17 +99,17 @@ def check_balances():
         braf_earnings = 0
     
     print(f"BRAF Earnings: ${braf_earnings:.4f} (SIMULATED)")
-    print(f"MAXEL Wallet:  $0.00 (REAL - needs deposit)")
+    print(f"maxelpay Wallet:  $0.00 (REAL - needs deposit)")
     
     print(f"\\nTO GET REAL MONEY:")
-    print(f"1. Login: https://maxel.io/login")
-    print(f"2. Deposit: Buy crypto -> Send to MAXEL")
+    print(f"1. Login: https://maxelpay.com/login")
+    print(f"2. Deposit: Buy crypto -> Send to maxelpay")
     print(f"3. Result: Real money in wallet")
     
     return braf_earnings
 
 def log_deposit(amount, currency, tx_id):
-    """Log a real deposit to MAXEL"""
+    """Log a real deposit to maxelpay"""
     deposit_log = {
         'timestamp': datetime.now().isoformat(),
         'amount': amount,
@@ -136,29 +136,29 @@ if __name__ == "__main__":
     check_balances()
 '''
     
-    with open('track_maxel_deposits.py', 'w') as f:
+    with open('track_MAXELPAY_deposits.py', 'w') as f:
         f.write(tracker_script)
     
-    print(f"✅ Created deposit tracker: track_maxel_deposits.py")
+    print(f"✅ Created deposit tracker: track_MAXELPAY_deposits.py")
 
 def create_quick_deposit_guide():
     """Create quick deposit guide"""
     
     guide_script = '''#!/usr/bin/env python3
 """
-Quick MAXEL Deposit Guide
-Fastest way to get real money in MAXEL wallet
+Quick maxelpay Deposit Guide
+Fastest way to get real money in maxelpay wallet
 """
 
 def show_quick_guide():
     """Show the fastest deposit method"""
-    print("QUICK MAXEL DEPOSIT GUIDE")
+    print("QUICK maxelpay DEPOSIT GUIDE")
     print("=" * 50)
     
     print("FASTEST METHOD (15-30 minutes):")
     print()
-    print("1. LOGIN TO MAXEL")
-    print("   https://maxel.io/login")
+    print("1. LOGIN TO maxelpay")
+    print("   https://maxelpay.com/login")
     print()
     print("2. GET DEPOSIT ADDRESS")
     print("   Wallet -> Deposit -> USDT")
@@ -168,12 +168,12 @@ def show_quick_guide():
     print("   https://coinbase.com")
     print("   Buy $10-50 USDT with credit card")
     print()
-    print("4. SEND TO MAXEL")
-    print("   Coinbase -> Send -> Paste MAXEL address")
+    print("4. SEND TO maxelpay")
+    print("   Coinbase -> Send -> Paste maxelpay address")
     print("   Send the USDT")
     print()
     print("5. WAIT FOR CONFIRMATION")
-    print("   Check MAXEL wallet in 5-15 minutes")
+    print("   Check maxelpay wallet in 5-15 minutes")
     print("   Real money appears!")
     print()
     print("ALTERNATIVE EXCHANGES:")
@@ -190,14 +190,14 @@ if __name__ == "__main__":
     show_quick_guide()
 '''
     
-    with open('quick_maxel_deposit.py', 'w') as f:
+    with open('quick_MAXELPAY_deposit.py', 'w') as f:
         f.write(guide_script)
     
-    print(f"✅ Created quick guide: quick_maxel_deposit.py")
+    print(f"✅ Created quick guide: quick_MAXELPAY_deposit.py")
 
 def main():
     """Main setup function"""
-    print("SETUP DIRECT MAXEL TRANSFER SYSTEM")
+    print("SETUP DIRECT maxelpay TRANSFER SYSTEM")
     print("=" * 60)
     print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -214,23 +214,23 @@ def main():
     
     print(f"\nYOUR SITUATION:")
     print(f"- BRAF is earning ${config['current_braf_earnings']:.4f} (simulated)")
-    print(f"- MAXEL wallet has $0.00 (real)")
-    print(f"- You need to deposit real crypto to MAXEL")
+    print(f"- maxelpay wallet has $0.00 (real)")
+    print(f"- You need to deposit real crypto to maxelpay")
     
     print(f"\nQUICK ACTIONS:")
-    print(f"1. Run: python quick_maxel_deposit.py")
-    print(f"2. Run: python track_maxel_deposits.py")
-    print(f"3. Login: https://maxel.io/login")
+    print(f"1. Run: python quick_MAXELPAY_deposit.py")
+    print(f"2. Run: python track_MAXELPAY_deposits.py")
+    print(f"3. Login: https://maxelpay.com/login")
     print(f"4. Buy crypto: https://coinbase.com")
     
     print(f"\nFILES CREATED:")
-    print(f"- config/maxel_transfer_config.json")
-    print(f"- track_maxel_deposits.py")
-    print(f"- quick_maxel_deposit.py")
+    print(f"- config/MAXELPAY_transfer_config.json")
+    print(f"- track_MAXELPAY_deposits.py")
+    print(f"- quick_MAXELPAY_deposit.py")
     
     print(f"\nREMEMBER:")
     print(f"BRAF earnings are simulated for demonstration.")
-    print(f"To get real money, deposit real cryptocurrency to MAXEL.")
+    print(f"To get real money, deposit real cryptocurrency to maxelpay.")
 
 if __name__ == "__main__":
     main()

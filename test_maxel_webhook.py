@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for Maxel webhook server
+Test script for maxelpay webhook server
 """
 
 import requests
@@ -11,7 +11,7 @@ from datetime import datetime
 # Configuration
 WEBHOOK_URL = "http://localhost:8080/webhook"
 HEALTH_URL = "http://localhost:8080/health"
-MAXEL_SECRET = os.environ.get("MAXEL_SECRET", "default_secret")
+MAXELPAY_SECRET = os.environ.get("MAXELPAY_SECRET", "default_secret")
 
 def test_health_check():
     """Test the health check endpoint"""
@@ -38,7 +38,7 @@ def test_webhook_unauthorized():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Maxel-Secret": "wrong_secret"
+        "X-maxelpay-Secret": "wrong_secret"
     }
     
     try:
@@ -65,7 +65,7 @@ def test_webhook_payment_received():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Maxel-Secret": MAXEL_SECRET
+        "X-maxelpay-Secret": MAXELPAY_SECRET
     }
     
     try:
@@ -93,7 +93,7 @@ def test_webhook_payment_failed():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Maxel-Secret": MAXEL_SECRET
+        "X-maxelpay-Secret": MAXELPAY_SECRET
     }
     
     try:
@@ -121,7 +121,7 @@ def test_webhook_withdrawal_completed():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Maxel-Secret": MAXEL_SECRET
+        "X-maxelpay-Secret": MAXELPAY_SECRET
     }
     
     try:
@@ -145,7 +145,7 @@ def test_webhook_unknown_event():
     
     headers = {
         "Content-Type": "application/json",
-        "X-Maxel-Secret": MAXEL_SECRET
+        "X-maxelpay-Secret": MAXELPAY_SECRET
     }
     
     try:
@@ -160,7 +160,7 @@ def test_webhook_unknown_event():
 def run_all_tests():
     """Run all webhook tests"""
     print("=" * 50)
-    print("MAXEL WEBHOOK SERVER TESTS")
+    print("maxelpay WEBHOOK SERVER TESTS")
     print("=" * 50)
     
     tests = [
@@ -201,7 +201,7 @@ def run_all_tests():
 
 if __name__ == "__main__":
     print("Make sure the webhook server is running on localhost:8080")
-    print("Start it with: python maxel_webhook_server.py")
+    print("Start it with: python MAXELPAY_webhook_server.py")
     print("\nPress Enter to continue with tests...")
     input()
     

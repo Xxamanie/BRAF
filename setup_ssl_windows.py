@@ -128,7 +128,7 @@ def main():
     print(f"   • HTTPS deployment")
     print(f"   • SSL certificate generation")
     print(f"   • Production hosting")
-    print(f"   • Secure MAXEL integration")
+    print(f"   • Secure maxelpay integration")
 
 if __name__ == "__main__":
     main()

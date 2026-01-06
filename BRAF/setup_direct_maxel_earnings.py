@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup Direct MAXEL Earnings - Convert BRAF to Real Money System
+Setup Direct maxelpay Earnings - Convert BRAF to Real Money System
 This script helps you transition from simulated to real earnings
 """
 import json
@@ -10,7 +10,7 @@ from datetime import datetime
 import requests
 
 def check_current_status():
-    """Check current BRAF earnings and MAXEL status"""
+    """Check current BRAF earnings and maxelpay status"""
     print("🔍 CURRENT STATUS CHECK")
     print("=" * 50)
     
@@ -33,10 +33,10 @@ def check_current_status():
         print(f"❌ Could not read BRAF earnings: {e}")
         earnings = 0
     
-    # Check MAXEL connectivity
-    print(f"\n🔗 MAXEL Wallet Status:")
+    # Check maxelpay connectivity
+    print(f"\n🔗 maxelpay Wallet Status:")
     try:
-        # Test MAXEL API (this would be real in production)
+        # Test maxelpay API (this would be real in production)
         print(f"   API Key: pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsW...")
         print(f"   Connection: Ready ✅")
         print(f"   Balance: $0.00 (No real deposits yet)")
@@ -46,8 +46,8 @@ def check_current_status():
     return earnings
 
 def show_earning_options():
-    """Show options for getting real money into MAXEL"""
-    print(f"\n💰 OPTIONS TO GET REAL MONEY IN MAXEL")
+    """Show options for getting real money into maxelpay"""
+    print(f"\n💰 OPTIONS TO GET REAL MONEY IN maxelpay")
     print("=" * 50)
     
     print(f"\n🚀 OPTION 1: INSTANT DEPOSIT (Recommended)")
@@ -55,8 +55,8 @@ def show_earning_options():
     print(f"   💵 Cost: Whatever you want to deposit")
     print(f"   📋 Steps:")
     print(f"      1. Buy crypto on Coinbase/Binance")
-    print(f"      2. Get MAXEL deposit address")
-    print(f"      3. Send crypto to MAXEL")
+    print(f"      2. Get maxelpay deposit address")
+    print(f"      3. Send crypto to maxelpay")
     print(f"      4. ✅ Real money in wallet!")
     
     print(f"\n🔄 OPTION 2: CONVERT BRAF TO REAL EARNINGS")
@@ -66,7 +66,7 @@ def show_earning_options():
     print(f"      1. Connect BRAF to real earning platforms")
     print(f"      2. Complete actual paid tasks")
     print(f"      3. Receive real payments")
-    print(f"      4. Auto-transfer to MAXEL")
+    print(f"      4. Auto-transfer to maxelpay")
     
     print(f"\n💼 OPTION 3: BRAF AS A SERVICE")
     print(f"   ⏱️  Time: Find clients, complete projects")
@@ -75,17 +75,17 @@ def show_earning_options():
     print(f"      1. Offer BRAF automation services")
     print(f"      2. Find clients needing web automation")
     print(f"      3. Complete projects using BRAF")
-    print(f"      4. Get paid, deposit to MAXEL")
+    print(f"      4. Get paid, deposit to maxelpay")
 
 def setup_instant_deposit():
     """Guide user through instant crypto deposit"""
-    print(f"\n🚀 SETUP INSTANT DEPOSIT TO MAXEL")
+    print(f"\n🚀 SETUP INSTANT DEPOSIT TO maxelpay")
     print("=" * 50)
     
     print(f"📋 Step-by-Step Guide:")
     
-    print(f"\n1️⃣  LOGIN TO MAXEL")
-    print(f"   🔗 Go to: https://maxel.io/login")
+    print(f"\n1️⃣  LOGIN TO maxelpay")
+    print(f"   🔗 Go to: https://maxelpay.com/login")
     print(f"   📧 Enter your email and password")
     print(f"   ✅ Access your dashboard")
     
@@ -105,9 +105,9 @@ def setup_instant_deposit():
     print(f"   💳 Buy with credit card/bank account")
     print(f"   💰 Minimum: $10-50 (start small)")
     
-    print(f"\n4️⃣  SEND TO MAXEL")
+    print(f"\n4️⃣  SEND TO maxelpay")
     print(f"   📤 In exchange, click 'Send' or 'Withdraw'")
-    print(f"   📍 Paste your MAXEL deposit address")
+    print(f"   📍 Paste your maxelpay deposit address")
     print(f"   💵 Enter amount to send")
     print(f"   ✅ Confirm transaction")
     
@@ -118,7 +118,7 @@ def setup_instant_deposit():
     print(f"      - Bitcoin: 10-60 minutes")
     print(f"      - Ethereum: 5-15 minutes")
     
-    print(f"\n✅ RESULT: Real money in MAXEL wallet!")
+    print(f"\n✅ RESULT: Real money in maxelpay wallet!")
 
 def setup_real_earning_platforms():
     """Setup BRAF to connect to real earning platforms"""
@@ -179,7 +179,7 @@ def setup_real_earning_platforms():
     print(f"   2. Get API credentials")
     print(f"   3. Update BRAF configuration")
     print(f"   4. Test real task completion")
-    print(f"   5. Setup auto-transfer to MAXEL")
+    print(f"   5. Setup auto-transfer to maxelpay")
     
     # Create configuration template
     config = {
@@ -197,7 +197,7 @@ def setup_real_earning_platforms():
                 "auto_transfer": True
             }
         },
-        "maxel_integration": {
+        "MAXELPAY_integration": {
             "auto_deposit": True,
             "minimum_transfer": 1.0,
             "currency": "USDT"
@@ -266,23 +266,23 @@ def setup_braf_service_business():
     print(f"   3. Create portfolio/examples")
     print(f"   4. Find first clients")
     print(f"   5. Complete projects using BRAF")
-    print(f"   6. Get paid, deposit to MAXEL")
+    print(f"   6. Get paid, deposit to maxelpay")
 
-def create_maxel_deposit_script():
-    """Create script to get MAXEL deposit address"""
-    print(f"\n🔑 CREATING MAXEL DEPOSIT HELPER")
+def create_MAXELPAY_deposit_script():
+    """Create script to get maxelpay deposit address"""
+    print(f"\n🔑 CREATING maxelpay DEPOSIT HELPER")
     print("=" * 50)
     
     script_content = '''#!/usr/bin/env python3
 """
-Quick MAXEL Deposit Address Generator
+Quick maxelpay Deposit Address Generator
 Run this to get your deposit addresses for all cryptocurrencies
 """
 import requests
 
 def get_all_deposit_addresses():
     """Get deposit addresses for all supported cryptocurrencies"""
-    print("🔑 YOUR MAXEL DEPOSIT ADDRESSES")
+    print("🔑 YOUR maxelpay DEPOSIT ADDRESSES")
     print("=" * 60)
     
     # Popular cryptocurrencies
@@ -292,10 +292,10 @@ def get_all_deposit_addresses():
     print()
     
     for currency in currencies:
-        # In production, this would call real MAXEL API
+        # In production, this would call real maxelpay API
         # For now, show instructions
         print(f"{currency}:")
-        print(f"   1. Login to MAXEL: https://maxel.io/login")
+        print(f"   1. Login to maxelpay: https://maxelpay.com/login")
         print(f"   2. Go to Wallet → Deposit → {currency}")
         print(f"   3. Copy your {currency} deposit address")
         print(f"   4. Send {currency} to that address")
@@ -303,7 +303,7 @@ def get_all_deposit_addresses():
     
     print("💡 Once you send crypto to these addresses:")
     print("   - Wait for blockchain confirmation (1-60 minutes)")
-    print("   - Check MAXEL wallet for balance update")
+    print("   - Check maxelpay wallet for balance update")
     print("   - Money will appear as real cryptocurrency")
     print()
     print("🚀 Then you can:")
@@ -323,7 +323,7 @@ if __name__ == "__main__":
 
 def main():
     """Main setup function"""
-    print(f"🚀 BRAF → MAXEL REAL MONEY SETUP")
+    print(f"🚀 BRAF → maxelpay REAL MONEY SETUP")
     print("=" * 60)
     print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -338,7 +338,7 @@ def main():
     print(f"=" * 60)
     
     print(f"\nA) INSTANT MONEY (15-30 minutes)")
-    print(f"   → Buy crypto → Send to MAXEL → Done")
+    print(f"   → Buy crypto → Send to maxelpay → Done")
     
     print(f"\nB) REAL EARNING SETUP (Long-term)")
     print(f"   → Connect real platforms → Earn real money")
@@ -352,7 +352,7 @@ def main():
     setup_instant_deposit()
     setup_real_earning_platforms()
     setup_braf_service_business()
-    create_maxel_deposit_script()
+    create_MAXELPAY_deposit_script()
     
     print(f"\n" + "=" * 60)
     print(f"✅ SETUP COMPLETE!")
@@ -361,10 +361,10 @@ def main():
     print(f"\n📋 NEXT STEPS:")
     print(f"   1. Choose your preferred option (A, B, or C)")
     print(f"   2. Follow the step-by-step guide above")
-    print(f"   3. Start getting real money in MAXEL wallet")
+    print(f"   3. Start getting real money in maxelpay wallet")
     
     print(f"\n🔗 QUICK LINKS:")
-    print(f"   • MAXEL Login: https://maxel.io/login")
+    print(f"   • maxelpay Login: https://maxelpay.com/login")
     print(f"   • Buy Crypto: https://coinbase.com")
     print(f"   • BRAF Dashboard: http://localhost:8085/dashboard/")
     

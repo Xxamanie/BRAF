@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Get Real Money in MAXEL Wallet - Simple Guide
+Get Real Money in maxelpay Wallet - Simple Guide
 Your BRAF has earned $0.32 (simulated) - here's how to get real money
 ""from datetime import datetime
 
@@ -27,8 +27,8 @@ def show_instant_solution():
     print(f"\nFASTEST SOLUTION (15-30 minutes):")
     print(f"=" * 50)
     
-    print(f"1. LOGIN TO MAXEL")
-    print(f"   Go to: https://maxel.io/login")
+    print(f"1. LOGIN TO maxelpay")
+    print(f"   Go to: https://maxelpay.com/login")
     
     print(f"\n2. GET DEPOSIT ADDRESS")
     print(f"   Click: Wallet -> Deposit -> USDT")
@@ -39,13 +39,13 @@ def show_instant_solution():
     print(f"   Buy: $10-50 worth of USDT")
     print(f"   (Use credit card - instant)")
     
-    print(f"\n4. SEND TO MAXEL")
+    print(f"\n4. SEND TO maxelpay")
     print(f"   In Coinbase: Send/Withdraw USDT")
-    print(f"   Paste: Your MAXEL address")
+    print(f"   Paste: Your maxelpay address")
     print(f"   Send: The USDT")
     
     print(f"\n5. WAIT 5-15 MINUTES")
-    print(f"   Check MAXEL wallet")
+    print(f"   Check maxelpay wallet")
     print(f"   Real money appears!")
 
 def show_free_earning_solution():
@@ -73,7 +73,7 @@ def show_free_earning_solution():
     print(f"2. Complete real paid tasks")
     print(f"3. Get paid (PayPal, crypto, etc.)")
     print(f"4. Convert to crypto if needed")
-    print(f"5. Send to MAXEL wallet")
+    print(f"5. Send to maxelpay wallet")
 
 def show_business_solution():
     """Show how to use BRAF as a business"""
@@ -103,20 +103,20 @@ def show_business_solution():
     print(f"2. Find clients needing automation")
     print(f"3. Complete projects using BRAF")
     print(f"4. Get paid by clients")
-    print(f"5. Deposit earnings to MAXEL")
+    print(f"5. Deposit earnings to maxelpay")
 
-def create_maxel_deposit_helper():
+def create_MAXELPAY_deposit_helper():
     """Create simple deposit helper"""
     script = '''#!/usr/bin/env python3
 """
-MAXEL Deposit Address Helper
+maxelpay Deposit Address Helper
 """
 def main():
-    print("MAXEL DEPOSIT ADDRESSES")
+    print("maxelpay DEPOSIT ADDRESSES")
     print("=" * 40)
     print()
     print("To get your deposit addresses:")
-    print("1. Login: https://maxel.io/login")
+    print("1. Login: https://maxelpay.com/login")
     print("2. Go to: Wallet -> Deposit")
     print("3. Select: USDT (recommended)")
     print("4. Copy: Your deposit address")
@@ -129,21 +129,21 @@ def main():
     print()
     print("After sending:")
     print("- Wait 1-60 minutes for confirmation")
-    print("- Check MAXEL wallet for balance")
+    print("- Check maxelpay wallet for balance")
     print("- Money appears as real crypto!")
 
 if __name__ == "__main__":
     main()
 '''
     
-    with open('maxel_deposit_helper.py', 'w', encoding='utf-8') as f:
+    with open('MAXELPAY_deposit_helper.py', 'w', encoding='utf-8') as f:
         f.write(script)
     
-    print(f"Created: maxel_deposit_helper.py")
+    print(f"Created: MAXELPAY_deposit_helper.py")
 
 def main():
     """Main function"""
-    print(f"GET REAL MONEY IN MAXEL WALLET")
+    print(f"GET REAL MONEY IN maxelpay WALLET")
     print(f"=" * 60)
     print(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -154,8 +154,8 @@ def main():
     print(f"\nTHE SITUATION:")
     print(f"- BRAF is working perfectly")
     print(f"- You've earned ${earnings:.4f} (but it's simulated)")
-    print(f"- MAXEL wallet is empty (no real deposits)")
-    print(f"- You need real cryptocurrency in MAXEL")
+    print(f"- maxelpay wallet is empty (no real deposits)")
+    print(f"- You need real cryptocurrency in maxelpay")
     
     print(f"\nYOUR OPTIONS:")
     print(f"=" * 60)
@@ -167,15 +167,15 @@ def main():
     
     # Create helper
     print(f"\n" + "=" * 60)
-    create_maxel_deposit_helper()
+    create_MAXELPAY_deposit_helper()
     
     print(f"\nSUMMARY:")
     print(f"=" * 60)
-    print(f"FASTEST: Buy crypto -> Send to MAXEL (15-30 min)")
+    print(f"FASTEST: Buy crypto -> Send to maxelpay (15-30 min)")
     print(f"FREE: Sign up for real earning platforms")
     print(f"BUSINESS: Offer BRAF services to clients")
     print(f"")
-    print(f"MAXEL Login: https://maxel.io/login")
+    print(f"maxelpay Login: https://maxelpay.com/login")
     print(f"Buy Crypto: https://coinbase.com")
     print(f"")
     print(f"The ${earnings:.4f} BRAF earnings are just tracking numbers.")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FastAPI-based Maxel webhook server with async support
+FastAPI-based maxelpay webhook server with async support
 Modern replacement for the Flask version
 """
 
@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 # FastAPI app
 app = FastAPI(
-    title="Maxel Webhook Server",
-    description="Modern async webhook server for Maxel payment notifications",
+    title="maxelpay Webhook Server",
+    description="Modern async webhook server for maxelpay payment notifications",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -30,7 +30,7 @@ app = FastAPI(
 security = HTTPBearer(auto_error=False)
 
 # Configuration
-MAXEL_SECRET = os.environ.get("MAXEL_SECRET", "default_secret")
+MAXELPAY_SECRET = os.environ.get("MAXELPAY_SECRET", "default_secret")
 
 # Pydantic models for request validation
 class WebhookPayload(BaseModel):
@@ -62,14 +62,14 @@ class InfoResponse(BaseModel):
     endpoints: Dict[str, str]
 
 # Authentication dependency
-async def verify_maxel_secret(request: Request) -> bool:
-    """Verify Maxel webhook secret from headers"""
-    secret = request.headers.get("X-Maxel-Secret")
-    if secret != MAXEL_SECRET:
+async def verify_MAXELPAY_secret(request: Request) -> bool:
+    """Verify maxelpay webhook secret from headers"""
+    secret = request.headers.get("X-maxelpay-Secret")
+    if secret != MAXELPAY_SECRET:
         logger.warning(f"Unauthorized webhook attempt from {request.client.host}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or missing X-Maxel-Secret header"
+            detail="Invalid or missing X-maxelpay-Secret header"
         )
     return True
 
@@ -100,9 +100,9 @@ async def handle_withdrawal_completed(data: WebhookPayload) -> None:
 async def webhook(
     payload: WebhookPayload,
     request: Request,
-    authenticated: bool = Depends(verify_maxel_secret)
+    authenticated: bool = Depends(verify_MAXELPAY_secret)
 ):
-    """Handle Maxel webhook notifications with async processing"""
+    """Handle maxelpay webhook notifications with async processing"""
     try:
         timestamp = datetime.now().isoformat()
         
@@ -145,7 +145,7 @@ async def health_check():
 async def root():
     """API information endpoint"""
     return InfoResponse(
-        service="Maxel Webhook Server (FastAPI)",
+        service="maxelpay Webhook Server (FastAPI)",
         status="running",
         version="2.0.0",
         endpoints={
@@ -160,14 +160,14 @@ async def root():
 @app.on_event("startup")
 async def startup_event():
     """Application startup"""
-    logger.info("🚀 Maxel FastAPI webhook server starting up...")
-    logger.info(f"Secret configured: {'✅' if MAXEL_SECRET != 'default_secret' else '⚠️  Using default secret!'}")
+    logger.info("🚀 maxelpay FastAPI webhook server starting up...")
+    logger.info(f"Secret configured: {'✅' if MAXELPAY_SECRET != 'default_secret' else '⚠️  Using default secret!'}")
 
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown"""
-    logger.info("🛑 Maxel FastAPI webhook server shutting down...")
+    logger.info("🛑 maxelpay FastAPI webhook server shutting down...")
 
 if __name__ == "__main__":
     # Configuration from environment
@@ -175,12 +175,12 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     debug = os.environ.get("DEBUG", "false").lower() == "true"
     
-    logger.info(f"Starting Maxel FastAPI webhook server on {host}:{port}")
+    logger.info(f"Starting maxelpay FastAPI webhook server on {host}:{port}")
     logger.info(f"Debug mode: {debug}")
     logger.info(f"API docs available at: http://{host}:{port}/docs")
     
     uvicorn.run(
-        "maxel_webhook_fastapi:app",
+        "MAXELPAY_webhook_fastapi:app",
         host=host,
         port=port,
         reload=debug,

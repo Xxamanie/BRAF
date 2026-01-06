@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-MAXEL Payment Integration - Real Cryptocurrency Payment Processing
-Replaces NOWPayments with MAXEL API for actual blockchain transactions
+maxelpay Payment Integration - Real Cryptocurrency Payment Processing
+Replaces NOWPayments with maxelpay API for actual blockchain transactions
 """
 
 import os
@@ -17,19 +17,19 @@ logger = logging.getLogger(__name__)
 
 class MAXELIntegration:
     """
-    Real cryptocurrency payment processing via MAXEL API
+    Real cryptocurrency payment processing via maxelpay API
     Supports multiple cryptocurrencies with actual blockchain transactions
     """
     
     def __init__(self):
-        # MAXEL API credentials
-        self.api_key = os.getenv('MAXEL_API_KEY', 'pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXEL_SECRET_KEY')
-        self.secret_key = os.getenv('MAXEL_SECRET_KEY', 'sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0')
-        self.base_url = os.getenv('MAXEL_BASE_URL', 'https://api.maxel.io/v1')
-        self.sandbox = os.getenv('MAXEL_SANDBOX', 'false').lower() == 'true'
+        # maxelpay API credentials
+        self.api_key = os.getenv('MAXELPAY_API_KEY', 'pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXELPAY_SECRET_KEY')
+        self.secret_key = os.getenv('MAXELPAY_SECRET_KEY', 'sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0')
+        self.base_url = os.getenv('MAXELPAY_BASE_URL', 'https://api.maxelpay.com/v1')
+        self.sandbox = os.getenv('MAXELPAY_SANDBOX', 'false').lower() == 'true'
         
         if self.sandbox:
-            self.base_url = 'https://api-sandbox.maxel.io/v1'
+            self.base_url = 'https://api-sandbox.maxelpay.com/v1'
         
         self.headers = {
             'Authorization': f'Bearer {self.api_key}',
@@ -38,11 +38,11 @@ class MAXELIntegration:
             'Accept': 'application/json'
         }
         
-        logger.info(f"MAXEL initialized - Mode: {'SANDBOX' if self.sandbox else 'LIVE'}")
+        logger.info(f"maxelpay initialized - Mode: {'SANDBOX' if self.sandbox else 'LIVE'}")
         logger.info(f"API Key: {self.api_key[:20]}...")
     
     def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict:
-        """Make authenticated request to MAXEL API"""
+        """Make authenticated request to maxelpay API"""
         url = f"{self.base_url}{endpoint}"
         
         try:
@@ -61,7 +61,7 @@ class MAXELIntegration:
             return response.json()
             
         except requests.exceptions.RequestException as e:
-            logger.error(f"MAXEL API request failed: {e}")
+            logger.error(f"maxelpay API request failed: {e}")
             if hasattr(e.response, 'text'):
                 logger.error(f"Response: {e.response.text}")
             return {'success': False, 'error': str(e)}
@@ -80,7 +80,7 @@ class MAXELIntegration:
         elif 'data' in response:
             return [currency['code'] for currency in response['data']]
         
-        # Default supported currencies for MAXEL
+        # Default supported currencies for maxelpay
         return ['BTC', 'ETH', 'USDT', 'USDC', 'LTC', 'BCH', 'XRP', 'ADA', 'DOT', 'LINK', 'BNB', 'MATIC']
     
     def get_exchange_rates(self, base_currency: str = 'USD') -> Dict[str, float]:
@@ -100,7 +100,7 @@ class MAXELIntegration:
         data = {
             'currency': currency.upper(),
             'user_id': user_id or f'braf_user_{int(datetime.now().timestamp())}',
-            'callback_url': os.getenv('MAXEL_CALLBACK_URL', 'https://api.braf.io/webhooks/maxel')
+            'callback_url': os.getenv('MAXELPAY_CALLBACK_URL', 'https://api.braf.io/webhooks/maxelpay')
         }
         
         response = self._make_request('POST', '/addresses', data)
@@ -126,7 +126,7 @@ class MAXELIntegration:
             'currency': currency.upper(),
             'destination_address': destination_address,
             'user_id': user_id or f'braf_withdrawal_{int(datetime.now().timestamp())}',
-            'callback_url': os.getenv('MAXEL_CALLBACK_URL', 'https://api.braf.io/webhooks/maxel')
+            'callback_url': os.getenv('MAXELPAY_CALLBACK_URL', 'https://api.braf.io/webhooks/maxelpay')
         }
         
         response = self._make_request('POST', '/withdrawals', data)
@@ -244,7 +244,7 @@ class MAXELIntegration:
             'currency': currency.upper(),
             'order_id': order_id,
             'description': description or f'BRAF Payment {order_id}',
-            'callback_url': os.getenv('MAXEL_CALLBACK_URL', 'https://api.braf.io/webhooks/maxel')
+            'callback_url': os.getenv('MAXELPAY_CALLBACK_URL', 'https://api.braf.io/webhooks/maxelpay')
         }
         
         response = self._make_request('POST', '/invoices', data)
@@ -254,11 +254,11 @@ class MAXELIntegration:
 class MAXELWalletManager:
     """
     Manages cryptocurrency wallets and addresses for the BRAF system
-    Integrates with MAXEL for actual blockchain operations
+    Integrates with maxelpay for actual blockchain operations
     """
     
     def __init__(self):
-        self.maxel = MAXELIntegration()
+        self.maxelpay = MAXELIntegration()
         self.supported_currencies = [
             'BTC', 'ETH', 'USDT', 'USDC', 'LTC', 'BCH', 'XRP', 'ADA', 
             'DOT', 'LINK', 'BNB', 'MATIC', 'AVAX', 'SOL', 'TRX'
@@ -270,7 +270,7 @@ class MAXELWalletManager:
         This creates a real blockchain address
         """
         try:
-            address_response = self.maxel.create_payment_address(
+            address_response = self.maxelpay.create_payment_address(
                 currency=currency.upper(),
                 user_id=user_id
             )
@@ -301,7 +301,7 @@ class MAXELWalletManager:
     def process_real_withdrawal(self, user_id: str, amount: float, 
                               currency: str, wallet_address: str, memo: str = None) -> Dict:
         """Process real cryptocurrency withdrawal to user's wallet"""
-        return self.maxel.process_withdrawal(
+        return self.maxelpay.process_withdrawal(
             user_id=user_id,
             amount=amount,
             currency=currency,
@@ -312,7 +312,7 @@ class MAXELWalletManager:
     def get_transaction_status(self, transaction_id: str) -> Dict:
         """Get real transaction status from blockchain"""
         try:
-            status_response = self.maxel.get_withdrawal_status(transaction_id)
+            status_response = self.maxelpay.get_withdrawal_status(transaction_id)
             
             if 'status' in status_response:
                 return {
@@ -333,9 +333,9 @@ class MAXELWalletManager:
             return {'error': str(e)}
     
     def get_wallet_balance(self) -> Dict:
-        """Get real wallet balances from MAXEL"""
+        """Get real wallet balances from maxelpay"""
         try:
-            balance_response = self.maxel.get_account_balance()
+            balance_response = self.maxelpay.get_account_balance()
             
             if 'balances' in balance_response:
                 balances = {}
@@ -357,27 +357,27 @@ class MAXELWalletManager:
             return {'success': False, 'error': str(e)}
 
 
-def test_maxel_integration():
-    """Test MAXEL integration with real API"""
-    print("Testing MAXEL Integration...")
+def test_MAXELPAY_integration():
+    """Test maxelpay integration with real API"""
+    print("Testing maxelpay Integration...")
     
     # Initialize
-    maxel = MAXELIntegration()
+    maxelpay = MAXELIntegration()
     
     # Test 1: API Status
     print("\n1. Testing API Status...")
-    status = maxel.get_api_status()
+    status = maxelpay.get_api_status()
     print(f"API Status: {status}")
     
     # Test 2: Available Currencies
     print("\n2. Getting Available Currencies...")
-    currencies = maxel.get_available_currencies()
+    currencies = maxelpay.get_available_currencies()
     print(f"Available Currencies: {len(currencies)} total")
     print(f"Sample: {currencies[:10]}")
     
     # Test 3: Exchange Rates
     print("\n3. Getting Exchange Rates...")
-    rates = maxel.get_exchange_rates('USD')
+    rates = maxelpay.get_exchange_rates('USD')
     print(f"Exchange Rates: {len(rates)} currencies")
     if rates:
         print(f"BTC/USD: {rates.get('BTC', 'N/A')}")
@@ -395,4 +395,4 @@ def test_maxel_integration():
 
 
 if __name__ == "__main__":
-    test_maxel_integration()
+    test_MAXELPAY_integration()

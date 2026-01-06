@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Startup script for Maxel webhook server with configuration
+Startup script for maxelpay webhook server with configuration
 """
 
 import os
 import sys
-from maxel_webhook_server import app, logger
+from MAXELPAY_webhook_server import app, logger
 
 def setup_environment():
     """Setup environment variables and configuration"""
@@ -15,7 +15,7 @@ def setup_environment():
         "HOST": "0.0.0.0",
         "PORT": "8080",
         "DEBUG": "false",
-        "MAXEL_SECRET": "your_secure_maxel_secret_here"
+        "MAXELPAY_SECRET": "your_secure_MAXELPAY_secret_here"
     }
     
     # Load from environment or use defaults
@@ -27,28 +27,28 @@ def setup_environment():
             logger.info(f"Using environment {key}: {os.environ[key]}")
     
     # Validate critical settings
-    if os.environ["MAXEL_SECRET"] == "your_secure_maxel_secret_here":
-        logger.warning("⚠️  Using default MAXEL_SECRET! Set MAXEL_SECRET environment variable for production!")
+    if os.environ["MAXELPAY_SECRET"] == "your_secure_MAXELPAY_secret_here":
+        logger.warning("⚠️  Using default MAXELPAY_SECRET! Set MAXELPAY_SECRET environment variable for production!")
     
     return config
 
 def print_startup_info():
     """Print startup information"""
     print("=" * 60)
-    print("🚀 MAXEL WEBHOOK SERVER")
+    print("🚀 maxelpay WEBHOOK SERVER")
     print("=" * 60)
     print(f"Host: {os.environ.get('HOST', '0.0.0.0')}")
     print(f"Port: {os.environ.get('PORT', '8080')}")
     print(f"Debug: {os.environ.get('DEBUG', 'false')}")
-    print(f"Secret configured: {'✅' if os.environ.get('MAXEL_SECRET') else '❌'}")
+    print(f"Secret configured: {'✅' if os.environ.get('MAXELPAY_SECRET') else '❌'}")
     print("=" * 60)
     print("Endpoints:")
     print("  GET  /         - Server info")
     print("  GET  /health   - Health check")
-    print("  POST /webhook  - Maxel webhook handler")
+    print("  POST /webhook  - maxelpay webhook handler")
     print("=" * 60)
     print("Environment Variables:")
-    print("  MAXEL_SECRET - Authentication secret (required)")
+    print("  MAXELPAY_SECRET - Authentication secret (required)")
     print("  HOST         - Server host (default: 0.0.0.0)")
     print("  PORT         - Server port (default: 8080)")
     print("  DEBUG        - Debug mode (default: false)")
@@ -69,7 +69,7 @@ def main():
         debug = os.environ.get("DEBUG", "false").lower() == "true"
         
         # Start server
-        logger.info("Starting Maxel webhook server...")
+        logger.info("Starting maxelpay webhook server...")
         app.run(host=host, port=port, debug=debug)
         
     except KeyboardInterrupt:

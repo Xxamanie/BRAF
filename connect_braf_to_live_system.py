@@ -123,8 +123,8 @@ def transfer_earnings_to_live_system(braf_data, enterprise_id):
     except Exception as e:
         return False, str(e)
 
-def setup_maxel_integration(enterprise_id, amount_usd):
-    """Setup MAXEL integration for withdrawals"""
+def setup_MAXELPAY_integration(enterprise_id, amount_usd):
+    """Setup maxelpay integration for withdrawals"""
     
     # Convert USD to NGN using live rates
     try:
@@ -230,17 +230,17 @@ def main():
         print(f"❌ Transfer failed: {result}")
         return False
     
-    # Step 5: Setup MAXEL integration
-    print(f"\n5️⃣  SETTING UP MAXEL INTEGRATION...")
-    success, result = setup_maxel_integration(enterprise_id, earnings)
+    # Step 5: Setup maxelpay integration
+    print(f"\n5️⃣  SETTING UP maxelpay INTEGRATION...")
+    success, result = setup_MAXELPAY_integration(enterprise_id, earnings)
     
     if success:
-        print(f"✅ MAXEL integration ready:")
+        print(f"✅ maxelpay integration ready:")
         print(f"   💰 USD Balance: ${result['balance_usd']:.4f}")
         print(f"   💰 NGN Equivalent: ₦{result['balance_ngn']:,.2f}")
         print(f"   📊 Exchange Rate: 1 USD = {result['exchange_rate']:.2f} NGN")
     else:
-        print(f"⚠️  MAXEL setup: {result}")
+        print(f"⚠️  maxelpay setup: {result}")
     
     # Step 6: Show access information
     print(f"\n" + "=" * 60)
@@ -260,13 +260,13 @@ def main():
     print(f"\n💰 YOUR EARNINGS:")
     print(f"   💵 BRAF Earnings: ${earnings:.4f}")
     print(f"   🏦 Live System: Connected")
-    print(f"   🔗 MAXEL Ready: Yes")
+    print(f"   🔗 maxelpay Ready: Yes")
     
     print(f"\n🚀 NEXT STEPS:")
     print(f"   1. Open: {LIVE_SYSTEM_URL}/dashboard")
     print(f"   2. Login with credentials above")
     print(f"   3. View your earnings and automations")
-    print(f"   4. Setup MAXEL withdrawal")
+    print(f"   4. Setup maxelpay withdrawal")
     print(f"   5. Continue running BRAF workers")
     
     return True

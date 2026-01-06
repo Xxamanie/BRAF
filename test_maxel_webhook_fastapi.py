@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for FastAPI Maxel webhook server
+Test script for FastAPI maxelpay webhook server
 """
 
 import asyncio
@@ -12,7 +12,7 @@ from typing import Dict, Any
 
 # Configuration
 BASE_URL = "http://localhost:8080"
-MAXEL_SECRET = os.environ.get("MAXEL_SECRET", "default_secret")
+MAXELPAY_SECRET = os.environ.get("MAXELPAY_SECRET", "default_secret")
 
 class WebhookTester:
     def __init__(self, base_url: str = BASE_URL):
@@ -64,7 +64,7 @@ class WebhookTester:
         
         headers = {
             "Content-Type": "application/json",
-            "X-Maxel-Secret": "wrong_secret"
+            "X-maxelpay-Secret": "wrong_secret"
         }
         
         try:
@@ -96,7 +96,7 @@ class WebhookTester:
         
         headers = {
             "Content-Type": "application/json",
-            "X-Maxel-Secret": MAXEL_SECRET
+            "X-maxelpay-Secret": MAXELPAY_SECRET
         }
         
         try:
@@ -129,7 +129,7 @@ class WebhookTester:
         
         headers = {
             "Content-Type": "application/json",
-            "X-Maxel-Secret": MAXEL_SECRET
+            "X-maxelpay-Secret": MAXELPAY_SECRET
         }
         
         try:
@@ -162,7 +162,7 @@ class WebhookTester:
         
         headers = {
             "Content-Type": "application/json",
-            "X-Maxel-Secret": MAXEL_SECRET
+            "X-maxelpay-Secret": MAXELPAY_SECRET
         }
         
         try:
@@ -189,7 +189,7 @@ class WebhookTester:
         
         headers = {
             "Content-Type": "application/json",
-            "X-Maxel-Secret": MAXEL_SECRET
+            "X-maxelpay-Secret": MAXELPAY_SECRET
         }
         
         try:
@@ -209,7 +209,7 @@ class WebhookTester:
     async def run_all_tests(self):
         """Run all webhook tests"""
         print("=" * 60)
-        print("MAXEL FASTAPI WEBHOOK SERVER TESTS")
+        print("maxelpay FASTAPI WEBHOOK SERVER TESTS")
         print("=" * 60)
         
         tests = [
@@ -252,7 +252,7 @@ class WebhookTester:
 async def main():
     """Main test function"""
     print("Make sure the FastAPI webhook server is running on localhost:8080")
-    print("Start it with: python maxel_webhook_fastapi.py")
+    print("Start it with: python MAXELPAY_webhook_fastapi.py")
     print("\nPress Enter to continue with tests...")
     input()
     

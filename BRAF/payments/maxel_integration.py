@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-MAXEL Payment Integration for BRAF
-Real cryptocurrency payment processing using MAXEL API
+maxelpay Payment Integration for BRAF
+Real cryptocurrency payment processing using maxelpay API
 """
 
 import os
@@ -12,16 +12,16 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 import json
 
-# Add monetization-system to path to import MAXEL integration
+# Add monetization-system to path to import maxelpay integration
 sys.path.append('../monetization-system')
 
 try:
-    from payments.maxel_integration import MAXELIntegration, MAXELWalletManager
+    from payments.MAXELPAY_integration import MAXELIntegration, MAXELWalletManager
 except ImportError:
     # Fallback implementation if monetization-system not available
     class MAXELIntegration:
         def __init__(self):
-            self.api_key = 'pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXEL_SECRET_KEY'
+            self.api_key = 'pk_Eq8N27HLVFDrPFd34j7a7cpIJd6PncsWMAXELPAY_SECRET_KEY'
             self.secret_key = 'sk_rI7pJyhIyaiU5js1BCpjYA53y5iS7Ny0'
             
         def get_available_currencies(self):
@@ -30,7 +30,7 @@ except ImportError:
         def process_withdrawal(self, user_id, amount, currency, wallet_address, memo=None):
             return {
                 'success': True,
-                'transaction_id': f'maxel_tx_{int(datetime.now().timestamp())}',
+                'transaction_id': f'MAXELPAY_tx_{int(datetime.now().timestamp())}',
                 'status': 'pending',
                 'amount': amount,
                 'currency': currency,
@@ -39,30 +39,30 @@ except ImportError:
     
     class MAXELWalletManager:
         def __init__(self):
-            self.maxel = MAXELIntegration()
+            self.maxelpay = MAXELIntegration()
             
         def process_real_withdrawal(self, user_id, amount, currency, wallet_address, memo=None):
-            return self.maxel.process_withdrawal(user_id, amount, currency, wallet_address, memo)
+            return self.maxelpay.process_withdrawal(user_id, amount, currency, wallet_address, memo)
 
 logger = logging.getLogger(__name__)
 
 
 class BRAFMAXELIntegration:
     """
-    BRAF-specific MAXEL integration for earnings and withdrawals
+    BRAF-specific maxelpay integration for earnings and withdrawals
     """
     
     def __init__(self):
-        self.maxel = MAXELIntegration()
+        self.maxelpay = MAXELIntegration()
         self.wallet_manager = MAXELWalletManager()
         
-        logger.info("BRAF MAXEL Integration initialized")
-        logger.info(f"API Key: {self.maxel.api_key[:20]}...")
+        logger.info("BRAF maxelpay Integration initialized")
+        logger.info(f"API Key: {self.maxelpay.api_key[:20]}...")
     
     def get_supported_currencies(self) -> List[str]:
         """Get list of supported cryptocurrencies"""
         try:
-            return self.maxel.get_available_currencies()
+            return self.maxelpay.get_available_currencies()
         except:
             return ['BTC', 'ETH', 'USDT', 'USDC', 'LTC', 'BCH', 'XRP', 'ADA']
     
@@ -143,9 +143,9 @@ class BRAFMAXELIntegration:
             }
 
 
-def test_braf_maxel_integration():
-    """Test BRAF MAXEL integration"""
-    print("🔧 Testing BRAF MAXEL Integration")
+def test_braf_MAXELPAY_integration():
+    """Test BRAF maxelpay integration"""
+    print("🔧 Testing BRAF maxelpay Integration")
     print("=" * 50)
     
     try:
@@ -170,13 +170,13 @@ def test_braf_maxel_integration():
         print("\n3. Testing withdrawal simulation...")
         print("   (Simulation only - no real transaction)")
         
-        print("\n✅ BRAF MAXEL integration test completed!")
+        print("\n✅ BRAF maxelpay integration test completed!")
         return True
         
     except Exception as e:
-        print(f"❌ BRAF MAXEL integration test failed: {e}")
+        print(f"❌ BRAF maxelpay integration test failed: {e}")
         return False
 
 
 if __name__ == "__main__":
-    test_braf_maxel_integration()
+    test_braf_MAXELPAY_integration()

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-MAXEL Deposit Address Helper
+maxelpay Deposit Address Helper
 """
 def main():
-    print("MAXEL DEPOSIT ADDRESSES")
+    print("maxelpay DEPOSIT ADDRESSES")
     print("=" * 40)
     print()
     print("To get your deposit addresses:")
-    print("1. Login: https://maxel.io/login")
+    print("1. Login: https://maxelpay.com/login")
     print("2. Go to: Wallet -> Deposit")
     print("3. Select: USDT (recommended)")
     print("4. Copy: Your deposit address")
@@ -20,7 +20,7 @@ def main():
     print()
     print("After sending:")
     print("- Wait 1-60 minutes for confirmation")
-    print("- Check MAXEL wallet for balance")
+    print("- Check maxelpay wallet for balance")
     print("- Money appears as real crypto!")
 
 if __name__ == "__main__":

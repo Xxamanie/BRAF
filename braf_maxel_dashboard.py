@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-BRAF-MAXEL Dashboard - Simple Status and Transfer Interface
-Shows current BRAF earnings and provides MAXEL integration
+BRAF-maxelpay Dashboard - Simple Status and Transfer Interface
+Shows current BRAF earnings and provides maxelpay integration
 """
 import json
 import webbrowser
@@ -24,7 +24,7 @@ def get_braf_status():
         }
 
 def show_dashboard():
-    """Display BRAF-MAXEL dashboard"""
+    """Display BRAF-maxelpay dashboard"""
     braf_data = get_braf_status()
     
     earnings = braf_data.get("total_earnings", 0)
@@ -37,7 +37,7 @@ def show_dashboard():
     usd_to_ngn = 1457.58
     earnings_ngn = earnings * usd_to_ngn
     
-    print("🤖 BRAF-MAXEL INTEGRATION DASHBOARD")
+    print("🤖 BRAF-maxelpay INTEGRATION DASHBOARD")
     print("=" * 60)
     print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
@@ -71,7 +71,7 @@ def show_dashboard():
     except:
         print(f"❌ Live System: Not running")
     
-    print(f"🔗 MAXEL Wallet: Ready for deposits")
+    print(f"🔗 maxelpay Wallet: Ready for deposits")
     
     print(f"\n💡 EARNING OPTIONS")
     print("-" * 40)
@@ -84,19 +84,19 @@ def show_dashboard():
         print(f"💰 CURRENT EARNINGS: ${earnings:.4f}")
         print(f"   Continue running workers for more")
     
-    print(f"\n🏦 MAXEL INTEGRATION")
+    print(f"\n🏦 maxelpay INTEGRATION")
     print("-" * 40)
-    print(f"💡 To get real money in MAXEL wallet:")
-    print(f"   1. Login: https://maxel.io/login")
+    print(f"💡 To get real money in maxelpay wallet:")
+    print(f"   1. Login: https://maxelpay.com/login")
     print(f"   2. Get deposit address")
     print(f"   3. Buy crypto (Coinbase/Binance)")
-    print(f"   4. Send to MAXEL address")
+    print(f"   4. Send to maxelpay address")
     print(f"   5. Real money appears!")
     
     print(f"\n📊 EARNINGS BREAKDOWN")
     print("-" * 40)
     print(f"Current BRAF earnings: ${earnings:.4f} (simulated)")
-    print(f"MAXEL wallet balance: $0.00 (real)")
+    print(f"maxelpay wallet balance: $0.00 (real)")
     print(f"To bridge the gap: Deposit real crypto")
     
     return braf_data
@@ -115,8 +115,8 @@ def show_quick_actions():
     print(f"   API Docs:  http://127.0.0.1:8003/docs")
     print(f"   Health:    http://127.0.0.1:8003/health")
     
-    print(f"\n3️⃣  MAXEL WALLET")
-    print(f"   Login:     https://maxel.io/login")
+    print(f"\n3️⃣  maxelpay WALLET")
+    print(f"   Login:     https://maxelpay.com/login")
     print(f"   Deposit:   Get address → Buy crypto → Send")
     print(f"   Withdraw:  Send crypto to external wallets")
     
@@ -126,15 +126,15 @@ def show_quick_actions():
     print(f"   Kraken:    https://kraken.com")
     
     print(f"\n5️⃣  MONITOR EARNINGS")
-    print(f"   python braf_maxel_dashboard.py")
-    print(f"   python track_maxel_deposits.py")
+    print(f"   python braf_MAXELPAY_dashboard.py")
+    print(f"   python track_MAXELPAY_deposits.py")
 
 def open_links():
     """Open important links in browser"""
     print(f"\n🌐 OPENING IMPORTANT LINKS...")
     
     links = [
-        ("MAXEL Login", "https://maxel.io/login"),
+        ("maxelpay Login", "https://maxelpay.com/login"),
         ("Live System Dashboard", "http://127.0.0.1:8003/dashboard"),
         ("Coinbase (Buy Crypto)", "https://coinbase.com"),
     ]
@@ -159,7 +159,7 @@ def main():
     print(f"🎯 WHAT WOULD YOU LIKE TO DO?")
     print(f"=" * 60)
     
-    print(f"\nA) Open MAXEL wallet (get real money)")
+    print(f"\nA) Open maxelpay wallet (get real money)")
     print(f"B) Open live system dashboard")
     print(f"C) Open Coinbase (buy crypto)")
     print(f"D) Show current status only")
@@ -169,8 +169,8 @@ def main():
         choice = input(f"\nEnter choice (A/B/C/D/E): ").upper().strip()
         
         if choice == 'A':
-            print(f"🔗 Opening MAXEL wallet...")
-            webbrowser.open("https://maxel.io/login")
+            print(f"🔗 Opening maxelpay wallet...")
+            webbrowser.open("https://maxelpay.com/login")
         elif choice == 'B':
             print(f"🔗 Opening live system dashboard...")
             webbrowser.open("http://127.0.0.1:8003/dashboard")
@@ -191,7 +191,7 @@ def main():
     
     print(f"\n💡 REMEMBER:")
     print(f"   BRAF earnings (${braf_data.get('total_earnings', 0):.4f}) are simulated")
-    print(f"   To get real money: Deposit crypto to MAXEL wallet")
+    print(f"   To get real money: Deposit crypto to maxelpay wallet")
     print(f"   Keep BRAF running: npm run simple-manager")
 
 if __name__ == "__main__":

@@ -9,17 +9,17 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Get Maxel secret from environment
-MAXEL_SECRET = os.environ.get("MAXEL_SECRET", "default_secret")
+# Get maxelpay secret from environment
+MAXELPAY_SECRET = os.environ.get("MAXELPAY_SECRET", "default_secret")
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    """Handle Maxel webhook notifications"""
+    """Handle maxelpay webhook notifications"""
     try:
         data = request.json
         
         # Simple secret check for authentication
-        if request.headers.get("X-Maxel-Secret") != MAXEL_SECRET:
+        if request.headers.get("X-maxelpay-Secret") != MAXELPAY_SECRET:
             logger.warning(f"Unauthorized webhook attempt from {request.remote_addr}")
             return jsonify({"error": "Unauthorized"}), 401
         
@@ -86,7 +86,7 @@ def health_check():
 def index():
     """Basic info endpoint"""
     return jsonify({
-        "service": "Maxel Webhook Server",
+        "service": "maxelpay Webhook Server",
         "status": "running",
         "endpoints": {
             "webhook": "/webhook (POST)",
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     debug = os.environ.get("DEBUG", "false").lower() == "true"
     
-    logger.info(f"Starting Maxel webhook server on {host}:{port}")
+    logger.info(f"Starting maxelpay webhook server on {host}:{port}")
     logger.info(f"Debug mode: {debug}")
     
     app.run(host=host, port=port, debug=debug)

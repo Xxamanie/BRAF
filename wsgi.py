@@ -14,8 +14,8 @@ try:
     from main import app
 except ImportError:
     try:
-        # Fallback to maxel webhook server
-        from maxel_webhook_server import app
+        # Fallback to maxelpay webhook server
+        from MAXELPAY_webhook_server import app
     except ImportError:
         # Last resort: create a simple Flask app
         from flask import Flask, jsonify
