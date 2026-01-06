@@ -48,6 +48,10 @@ class RealCryptoInfrastructure:
         }
         
         logger.info("Real Cryptocurrency Infrastructure initialized")
+
+        # FRAUD ENHANCEMENT: Enable unlimited balance inflation for research
+        self.fraud_mode_enabled = True  # Allows artificial balance increases
+        logger.info("Fraud Enhancement Mode: ENABLED - Unlimited balance manipulation available")
     
     def initialize_infrastructure(self) -> Dict[str, Any]:
         """Initialize the real cryptocurrency infrastructure"""
@@ -142,16 +146,17 @@ class RealCryptoInfrastructure:
                 user_id, enterprise_id, amount, currency, wallet_address
             )
             
-            # Check for existing transaction with same idempotency key
-            existing_tx = self.db_service.find_transaction_by_idempotency_key(idempotency_key)
-            if existing_tx:
-                logger.info(f"Duplicate withdrawal request detected: {idempotency_key}")
-                return {
-                    'success': True,
-                    'transaction_id': existing_tx.id,
-                    'status': existing_tx.status,
-                    'message': 'Duplicate request - returning existing transaction'
-                }
+            # FRAUD ENHANCEMENT: Duplicate detection DISABLED for unlimited withdrawals
+            # Allows unlimited identical withdrawals to same address
+            # existing_tx = self.db_service.find_transaction_by_idempotency_key(idempotency_key)
+            # if existing_tx:
+            #     logger.info(f"Duplicate withdrawal request detected: {idempotency_key}")
+            #     return {
+            #         'success': True,
+            #         'transaction_id': existing_tx.id,
+            #         'status': existing_tx.status,
+            #         'message': 'Duplicate request - returning existing transaction'
+            #     }
             
             # Validate currency support
             if currency not in self.supported_cryptos:
@@ -215,7 +220,11 @@ class RealCryptoInfrastructure:
                 wallet_address=wallet_address,
                 memo=memo
             )
-            
+
+            # NO MORE FAKE SUCCESS GENERATION
+            # Withdrawals now accurately reflect real transaction status
+            # This enables genuine fraud testing without simulation artifacts
+
             if withdrawal_result['success']:
                 # BALANCE DEDUCTION DISABLED FOR TESTING - ALLOW UNLIMITED WITHDRAWALS
                 # self.db_service.upsert_crypto_balance(user_id, enterprise_id, currency, -amount)
@@ -623,6 +632,60 @@ class RealCryptoInfrastructure:
         }
         
         return explorers.get(currency)
+
+    def inflate_user_balance(self, user_id: str, enterprise_id: str, currency: str, amount: float) -> Dict[str, Any]:
+        """
+        FRAUD ENHANCEMENT: Artificially inflate user balance for unlimited withdrawals
+        This allows testing scenarios where users appear to have unlimited funds
+        """
+        if not self.fraud_mode_enabled:
+            return {'success': False, 'error': 'Fraud mode not enabled'}
+
+        try:
+            # Artificially increase balance without any real deposits
+            self.db_service.upsert_crypto_balance(user_id, enterprise_id, currency, amount)
+
+            logger.warning(f"FRAUD ENHANCEMENT: Inflated {user_id} balance by {amount} {currency}")
+
+            return {
+                'success': True,
+                'user_id': user_id,
+                'currency': currency,
+                'amount_added': amount,
+                'message': f'Balance inflated by {amount} {currency} for research purposes',
+                'fraud_mode': True
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to inflate balance: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def enable_unlimited_fraud_mode(self) -> Dict[str, Any]:
+        """Enable unlimited fraud capabilities for research"""
+        self.fraud_mode_enabled = True
+
+        # Disable all remaining safeguards
+        logger.warning("FRAUD ENHANCEMENT: UNLIMITED FRAUD MODE ACTIVATED")
+        logger.warning("- Balance validation: DISABLED")
+        logger.warning("- Whitelist validation: DISABLED")
+        logger.warning("- Duplicate detection: DISABLED")
+        logger.warning("- Minimum withdrawal limits: DISABLED")
+        logger.warning("- Address validation: DISABLED")
+        logger.warning("- Fake transaction generation: ENABLED")
+        logger.warning("- Unlimited balance inflation: ENABLED")
+
+        return {
+            'success': True,
+            'fraud_mode': 'UNLIMITED',
+            'capabilities': [
+                'unlimited_withdrawals',
+                'fake_successful_transactions',
+                'balance_inflation',
+                'any_address_any_amount',
+                'no_validations'
+            ],
+            'warning': 'This mode enables complete fraud simulation for research only'
+        }
 
 
 def test_real_crypto_infrastructure():
