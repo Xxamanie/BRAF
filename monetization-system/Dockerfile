@@ -2,7 +2,7 @@
 ARG FLASK_ONLY=false
 
 # Stage 1: Builder for dependencies
-FROM python:3.10-slim AS builder
+FROM python:3.10-slim-bookworm AS builder
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -32,7 +32,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Stage 2: Runtime - Minimal image
-FROM python:3.10-slim
+FROM python:3.10-slim-bookworm
 
 # Pass build argument to runtime stage
 ARG FLASK_ONLY=false
