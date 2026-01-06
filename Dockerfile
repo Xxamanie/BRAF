@@ -68,7 +68,7 @@ RUN if [ "$FLASK_ONLY" = "true" ]; then \
             libxdamage1 \
             libxrandr2 \
             libgbm1 \
-            libpango1.0-0 \
+            libpango-1.0-0 \
             libasound2 \
             wget \
             && rm -rf /var/lib/apt/lists/*; \
