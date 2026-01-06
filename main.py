@@ -40,7 +40,7 @@ async def root():
 # Try to import and mount additional apps
 try:
     # Import maxelpay webhook FastAPI app
-    from MAXELPAY_webhook_fastapi import app as webhook_app
+    from maxel_webhook_fastapi import app as webhook_app
     app.mount("/webhook", webhook_app)
 except ImportError:
     pass
