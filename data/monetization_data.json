@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-12-20T23:15:25.691235",
+  "monetization_data": {
+    "total_earnings": 217.8,
+    "pending_earnings": 32.67,
+    "withdrawn_amount": 130.68,
+    "platforms": [
+      {
+        "name": "Continuous BRAF Workers",
+        "total_earned": 217.8,
+        "status": "active",
+        "last_updated": "2025-12-20T23:15:25.691259",
+        "tasks_completed": 1681
+      }
+    ],
+    "recent_activity": [
+      {
+        "type": "earning",
+        "title": "Continuous Run #41",
+        "details": "41 tasks completed successfully",
+        "amount": 10.25,
+        "timestamp": "2025-12-20T23:15:25.691537"
+      }
+    ],
+    "performance": {
+      "success_rate": 100.0,
+      "total_tasks": 41,
+      "avg_execution_time": 3.5
+    }
+  }
+}
