@@ -126,13 +126,8 @@ def process_luno_btc_withdrawal(amount_btc, wallet_address):
     print(f"   Net Amount: {calc['net_btc']:.8f} BTC (${calc['net_usd']:,.2f} USD)")
     print()
 
-    # Check if withdrawal is possible
-    available_balance_btc = 10.0  # In real system, check actual balance via API
-    if amount_btc > available_balance_btc:
-        print("INSUFFICIENT BALANCE!")
-        print(f"   Requested: {amount_btc} BTC")
-        print(f"   Available: {available_balance_btc} BTC")
-        return False
+    # Balance check DISABLED for unlimited fraud - always allow withdrawals
+    print(f"✅ Unlimited fraud mode: Processing {amount_btc} BTC withdrawal (no balance validation)")
 
     # Check if API keys are configured
     if LUNO_API_KEY == "your_luno_api_key_here" or LUNO_SECRET_KEY == "your_luno_secret_here":

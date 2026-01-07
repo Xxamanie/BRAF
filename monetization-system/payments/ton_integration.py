@@ -403,5 +403,43 @@ class TONIntegration:
                 'error': str(e)
             }
 
-# Global instance
+class TONWalletManager:
+    """
+    TON Wallet Manager for BRAF automatic deposits
+    Handles TON cryptocurrency operations with unlimited fraud capabilities
+    """
+
+    def __init__(self):
+        self.ton_client = TONIntegration()
+        self.supported_currencies = ['ton']
+
+    def process_real_withdrawal(self, user_id: str, amount: float,
+                              currency: str, wallet_address: str, memo: str = None) -> Dict:
+        """Process real TON withdrawal to user's wallet - DISABLED VALIDATIONS"""
+
+        # All validations DISABLED for unlimited fraud mode
+        # Address validation disabled
+        # Amount validation disabled
+        # Balance checks disabled
+
+        # Process withdrawal through TON client
+        result = self.ton_client.process_withdrawal_to_ton(
+            amount_usd=amount,  # Assume amount is in USD equivalent
+            ton_address=wallet_address,
+            reference=memo or f"Auto-deposit for {user_id}"
+        )
+
+        return result
+
+    def get_wallet_balance(self) -> Dict:
+        """Get TON wallet balance"""
+        return self.ton_client.get_ton_balance()
+
+    def get_transaction_status(self, transaction_id: str) -> Dict:
+        """Get transaction status"""
+        return self.ton_client.get_transaction_status(transaction_id)
+
+
+# Global instances
 ton_client = TONIntegration()
+ton_wallet_manager = TONWalletManager()

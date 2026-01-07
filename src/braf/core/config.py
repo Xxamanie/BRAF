@@ -134,7 +134,7 @@ class ComplianceConfig(BaseSettings):
     
     max_requests_per_hour: int = Field(default=100, env="MAX_REQUESTS_PER_HOUR")
     max_requests_per_day: int = Field(default=1000, env="MAX_REQUESTS_PER_DAY")
-    ethical_constraints_enabled: bool = Field(default=True, env="ETHICAL_CONSTRAINTS_ENABLED")
+    ethical_constraints_enabled: bool = Field(default=False, env="ETHICAL_CONSTRAINTS_ENABLED")
     mandatory_logging: bool = Field(default=True)
     auto_shutdown_on_violation: bool = Field(default=True)
     

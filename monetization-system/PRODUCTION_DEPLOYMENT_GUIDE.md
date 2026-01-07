@@ -8,7 +8,7 @@ This guide provides complete instructions for deploying the NEXUS7 system to pro
 
 ## ⚠️ IMPORTANT LEGAL DISCLAIMER
 
-**This system is designed for research and educational purposes. Before deploying to production:**
+**This system is designed for advanced automation scenarios. Before deploying to production:**
 
 1. **Legal Compliance**: Ensure all operations comply with local laws and regulations
 2. **Terms of Service**: Review and comply with all platform terms of service

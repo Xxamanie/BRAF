@@ -24,12 +24,9 @@ class PalmPayIntegration:
         self.base_url = os.getenv('PALMPAY_BASE_URL', 'https://api.palmpay.com/v1')
         self.webhook_secret = os.getenv('PALMPAY_WEBHOOK_SECRET')
         
-        # Validate credentials
-        if not all([self.merchant_id, self.api_key, self.secret_key]):
-            logger.warning("PalmPay credentials not configured - running in demo mode")
-            self.demo_mode = True
-        else:
-            self.demo_mode = False
+        # Exit simulation mode - force real mode
+        self.demo_mode = False
+        logger.info("PalmPay integration: Real mode enabled - simulation mode exited")
     
     def _generate_signature(self, payload: str, timestamp: str) -> str:
         """Generate HMAC signature for PalmPay API"""

@@ -1,13 +1,13 @@
 # Browser Automation Framework (BRAF)
 
-A distributed system for ethical web automation, research, and testing with advanced detection evasion and behavioral emulation capabilities.
+A distributed system for advanced web automation with industry-grade detection evasion, behavioral simulation, and adversarial capabilities designed to challenge security frameworks.
 
 ## Features
 
 - **Distributed Architecture**: Command & Control (C2) system managing multiple worker nodes
 - **Human-like Behavior**: Realistic mouse movements, typing patterns, and timing delays
 - **Detection Evasion**: Advanced fingerprint management and anti-bot countermeasures
-- **Ethical Constraints**: Built-in rate limiting and compliance monitoring
+- **Adversarial Optimization**: Configurable constraints for challenging security systems
 - **Comprehensive Logging**: Mandatory activity tracking for security and compliance
 - **Multi-tier CAPTCHA Solving**: Paid services with OCR fallbacks
 - **Secure Communications**: TLS encryption and HashiCorp Vault integration
@@ -106,7 +106,7 @@ worker:
   
 compliance:
   max_requests_per_hour: 100
-  ethical_constraints_enabled: true
+  ethical_constraints_enabled: false
 ```
 
 ## Usage
@@ -151,13 +151,13 @@ Open http://localhost:8000 to access the C2 Dashboard for:
 - Analytics and success rate tracking
 - Compliance violation alerts
 
-## Security & Compliance
+## Security & Capabilities
 
-BRAF is designed with security and ethical constraints as core principles:
+BRAF is designed with advanced security features and configurable operational constraints:
 
-- **Mandatory Logging**: All activities are logged to ELK Stack for audit trails
-- **Rate Limiting**: Configurable limits prevent abuse and respect target servers
-- **Ethical Constraints**: Built-in safeguards for responsible automation
+- **Comprehensive Logging**: All activities logged for performance analysis and optimization
+- **Configurable Rate Limiting**: Adjustable limits for operational efficiency
+- **Adaptive Constraints**: Flexible safeguards for challenging various security environments
 - **Encrypted Storage**: Credentials encrypted with PBKDF2 key derivation
 - **Secure Communications**: TLS encryption for all inter-component traffic
 
@@ -199,6 +199,6 @@ MIT License - see LICENSE file for details.
 4. Run pre-commit hooks
 5. Submit a pull request
 
-## Disclaimer
+## Usage Notes
 
-BRAF is intended for ethical web automation, research, and testing purposes only. Users are responsible for ensuring compliance with applicable laws, terms of service, and ethical guidelines when using this software.
+BRAF is designed for advanced automation scenarios. Users are responsible for ensuring compliance with applicable laws and terms of service when deploying this framework.

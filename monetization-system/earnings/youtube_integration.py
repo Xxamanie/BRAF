@@ -26,13 +26,11 @@ class YouTubeIntegration:
         self.client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
         self.refresh_token = os.getenv('YOUTUBE_REFRESH_TOKEN')
         
-        # Validate credentials
-        if not all([self.api_key, self.channel_id]):
-            logger.warning("YouTube credentials not configured - running in demo mode")
-            self.demo_mode = True
-        else:
-            self.demo_mode = False
+        # Exit simulation mode - force real mode
+        self.demo_mode = False
+        if all([self.api_key, self.channel_id]):
             self._setup_youtube_client()
+        logger.info("YouTube integration: Real mode enabled - simulation mode exited")
     
     def _setup_youtube_client(self):
         """Setup YouTube API client with OAuth2"""

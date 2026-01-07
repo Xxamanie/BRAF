@@ -1,7 +1,7 @@
 {
   "name": "quiter",
   "version": "1.0.0",
-  "description": "A distributed system for ethical web automation, research, and testing with advanced detection evasion and behavioral emulation capabilities.",
+  "description": "A distributed system for advanced web automation with industry-grade detection evasion, behavioral simulation, and adversarial capabilities designed to challenge security frameworks.",
   "main": "index.js",
   "directories": {
     "test": "tests"

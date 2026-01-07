@@ -58,9 +58,8 @@ class ProductionBrowserAutomation:
         self.click_delays = (0.5, 2.0)    # Min, max delay before clicks
         self.scroll_delays = (1.0, 3.0)   # Min, max delay between scrolls
         
-        self.demo_mode = not all([self.proxy_username, self.captcha_api_key])
-        if self.demo_mode:
-            logger.warning("Production credentials not configured - running in demo mode")
+        self.demo_mode = False  # Exit simulation mode - force real mode
+        logger.info("Browser automation: Real mode enabled - simulation mode exited")
     
     def create_browser_profile(self, profile_name: str = None, behavioral_profile: Dict = None) -> Dict[str, Any]:
         """Create realistic browser profile with comprehensive entropy management"""

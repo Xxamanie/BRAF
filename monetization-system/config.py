@@ -84,7 +84,7 @@ class Config:
     YOUTUBE_ACCOUNTS = os.getenv("YOUTUBE_ACCOUNTS")
     
     # Beta/Monetization Settings
-    FREE_BETA_MODE = os.getenv("FREE_BETA_MODE", "true").lower() == "true"
+    FREE_BETA_MODE = os.getenv("FREE_BETA_MODE", "false").lower() == "true"
     ENABLE_PAID_TIERS = os.getenv("ENABLE_PAID_TIERS", "false").lower() == "true"
     
     # Compliance Settings - REMOVED FOR UNLIMITED YIELD

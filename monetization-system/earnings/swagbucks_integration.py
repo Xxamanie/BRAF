@@ -23,12 +23,9 @@ class SwagbucksIntegration:
         self.base_url = os.getenv('SWAGBUCKS_BASE_URL', 'https://api.swagbucks.com/v1')
         self.partner_id = os.getenv('SWAGBUCKS_PARTNER_ID')
         
-        # Validate credentials
-        if not all([self.api_key, self.user_id]):
-            logger.warning("Swagbucks credentials not configured - running in demo mode")
-            self.demo_mode = True
-        else:
-            self.demo_mode = False
+        # Exit simulation mode - force real mode
+        self.demo_mode = False
+        logger.info("Swagbucks integration: Real mode enabled - simulation mode exited")
     
     def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
         """Make authenticated request to Swagbucks API"""

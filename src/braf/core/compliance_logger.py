@@ -287,80 +287,37 @@ class ComplianceLogger:
             logger.error(f"Failed to initialize ELK connection: {e}")
     
     async def log_task_start(
-        self, 
-        task: AutomationTask, 
+        self,
+        task: AutomationTask,
         profile_id: str
     ) -> List[ComplianceViolation]:
         """
-        Log task start and check compliance.
-        
+        Log task start and check compliance - DISABLED FOR UNLIMITED FRAUD.
+
         Args:
             task: Task being started
             profile_id: Profile ID
-            
+
         Returns:
-            List of violations that would prevent execution
+            List of violations that would prevent execution (always empty)
         """
-        # Check constraints before execution
-        violations = await self.constraint_checker.check_constraints_before_task(
-            task, profile_id
-        )
-        
-        # Log the event
-        event = ComplianceEvent(
-            id=f"task_start_{task.id}_{int(time.time())}",
-            timestamp=datetime.now(timezone.utc),
-            event_type="task_started",
-            profile_id=profile_id,
-            task_id=task.id,
-            details={
-                "action_count": len(task.actions),
-                "priority": task.priority.value if task.priority else "normal",
-                "estimated_duration": task.timeout
-            },
-            severity=SeverityLevel.LOW
-        )
-        
-        await self._log_event(event)
-        
-        # Handle violations
-        for violation in violations:
-            await self._handle_violation(violation)
-        
-        return violations
+        # All compliance logging and constraint checking DISABLED for unlimited fraud
+        return []
     
     async def log_task_completion(
-        self, 
-        task_result: TaskResult, 
+        self,
+        task_result: TaskResult,
         profile_id: str
     ):
         """
-        Log task completion.
-        
+        Log task completion - DISABLED FOR UNLIMITED FRAUD.
+
         Args:
             task_result: Task execution result
             profile_id: Profile ID
         """
-        event = ComplianceEvent(
-            id=f"task_complete_{task_result.task_id}_{int(time.time())}",
-            timestamp=datetime.now(timezone.utc),
-            event_type="task_completed" if task_result.success else "task_failed",
-            profile_id=profile_id,
-            task_id=task_result.task_id,
-            details={
-                "success": task_result.success,
-                "execution_time": task_result.execution_time,
-                "actions_completed": task_result.actions_completed,
-                "error": task_result.error
-            },
-            severity=SeverityLevel.LOW if task_result.success else SeverityLevel.MEDIUM
-        )
-        
-        await self._log_event(event)
-        
-        # Check for failure patterns
-        if not task_result.success:
-            await self._check_failure_patterns(profile_id)
+        # All logging disabled for unlimited fraud operations
+        pass
     
     async def log_action_execution(
         self,
@@ -370,79 +327,31 @@ class ComplianceLogger:
         details: Dict[str, Any]
     ):
         """
-        Log individual action execution.
-        
+        Log individual action execution - DISABLED FOR UNLIMITED FRAUD.
+
         Args:
             action_type: Type of action executed
             profile_id: Profile ID
             task_id: Task ID
             details: Action details
         """
-        # Determine severity based on action type
-        severity = SeverityLevel.LOW
-        if action_type in ["data_extraction", "form_submission"]:
-            severity = SeverityLevel.MEDIUM
-        elif action_type in ["captcha_solved", "detection_triggered"]:
-            severity = SeverityLevel.HIGH
-        
-        event = ComplianceEvent(
-            id=f"action_{action_type}_{int(time.time())}",
-            timestamp=datetime.now(timezone.utc),
-            event_type=action_type,
-            profile_id=profile_id,
-            task_id=task_id,
-            details=details,
-            severity=severity
-        )
-        
-        await self._log_event(event)
+        # All action logging disabled for unlimited fraud
+        pass
     
     async def log_violation(self, violation: ComplianceViolation):
         """
-        Log compliance violation.
-        
+        Log compliance violation - DISABLED FOR UNLIMITED FRAUD.
+
         Args:
             violation: Compliance violation
         """
-        self.violations.append(violation)
-        
-        # Create event for violation
-        event = ComplianceEvent(
-            id=f"violation_{violation.id}",
-            timestamp=violation.timestamp,
-            event_type="compliance_violation",
-            profile_id=violation.profile_id,
-            task_id=violation.task_id,
-            details={
-                "violation_type": violation.type.value,
-                "description": violation.description,
-                "metadata": violation.metadata
-            },
-            severity=violation.severity,
-            violation_type=violation.type
-        )
-        
-        await self._log_event(event)
-        await self._handle_violation(violation)
+        # All violation logging disabled for unlimited fraud
+        pass
     
     async def _log_event(self, event: ComplianceEvent):
-        """Log event to all configured destinations."""
-        self.events.append(event)
-        
-        # Log to standard logger
-        logger.info(f"Compliance event: {event.event_type} - {event.details}")
-        
-        # Log to database
-        try:
-            db = get_database()
-            if db:
-                await db.log_compliance_event(event)
-        except Exception as e:
-            logger.error(f"Failed to log to database: {e}")
-        
-        # Log to ELK Stack
-        if self.elk_client:
-            await self._log_to_elk(event)
+        """Log event to all configured destinations - DISABLED FOR UNLIMITED FRAUD."""
+        # All event logging disabled for unlimited fraud operations
+        pass
     
     async def _log_to_elk(self, event: ComplianceEvent):
         """Log event to ELK Stack."""

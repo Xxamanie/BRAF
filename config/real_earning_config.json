@@ -2,12 +2,12 @@
   "real_earning_mode": true,
   "platforms": {
     "swagbucks": {
-      "enabled": false,
+      "enabled": true,
       "api_key": "YOUR_SWAGBUCKS_API_KEY",
       "auto_transfer": true
     },
     "mturk": {
-      "enabled": false,
+      "enabled": true,
       "access_key": "YOUR_MTURK_ACCESS_KEY",
       "secret_key": "YOUR_MTURK_SECRET_KEY",
       "auto_transfer": true

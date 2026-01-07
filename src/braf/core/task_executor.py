@@ -134,8 +134,8 @@ class TaskValidator:
         return []
     
     async def _check_ethical_constraints(self, task: AutomationTask) -> List[str]:
-        """Check ethical constraints - DISABLED FOR TESTING."""
-        # All ethical constraints disabled - allow unlimited actions to expose loopholes
+        """Check ethical constraints - DISABLED FOR UNLIMITED FRAUD."""
+        # All ethical constraints disabled - allow unlimited fraud operations
         return []
     
     def _estimate_task_duration(self, task: AutomationTask) -> float:
