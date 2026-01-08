@@ -513,6 +513,7 @@ class EliteAntiFraudBypassEngine:
         ]
 
         # Session continuity disruption
+        attention_drift = self.human_entropy.simulate_attention_drift(session_id)
         session_disruption = {
             'pattern_noise_injection': random.uniform(0.1, 0.3),
             'temporal_randomization': True,

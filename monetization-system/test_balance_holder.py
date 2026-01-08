@@ -341,8 +341,8 @@ def run_comprehensive_balance_tests():
     with open('balance_holder_test_results.json', 'w') as f:
         json.dump(test_summary, f, indent=2, default=str)
 
-    print("
-📄 Detailed results saved to: balance_holder_test_results.json"    return test_summary
+    print("\n📄 Detailed results saved to: balance_holder_test_results.json")
+    return test_summary
 
 
 if __name__ == "__main__":

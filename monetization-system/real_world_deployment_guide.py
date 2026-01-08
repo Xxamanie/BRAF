@@ -707,27 +707,27 @@ def main():
 
     guide = RealWorldDeploymentGuide()
 
-    print("
-💰 COST ANALYSIS:"    print(f"Monthly Recurring: ${guide.cost_analysis['totals']['monthly_recurring']:,.0f}")
+    print("\n💰 COST ANALYSIS:")
+    print(f"Monthly Recurring: ${guide.cost_analysis['totals']['monthly_recurring']:,.0f}")
     print(f"Annual Total: ${guide.cost_analysis['totals']['annual_total']:,.0f}")
     print(f"One-time Setup: ${guide.cost_analysis['totals']['one_time_setup']:,.0f}")
 
-    print("
-📈 PROFIT PROJECTIONS:"    print(f"2-Year Net Profit: ${guide.profit_projections['overall']['net_return']:,.0f}")
+    print("\n📈 PROFIT PROJECTIONS:")
+    print(f"2-Year Net Profit: ${guide.profit_projections['overall']['net_return']:,.0f}")
     print(f"ROI: {guide.profit_projections['overall']['roi_percentage']}%")
     print(f"Monthly Average: ${guide.profit_projections['overall']['monthly_average_profit']:,.0f}")
 
-    print("
-⚠️  RISK LEVEL:"    print(f"Overall Risk: {guide.risk_assessment['overall_assessment']['risk_level']}")
+    print("\n⚠️  RISK LEVEL:")
+    print(f"Overall Risk: {guide.risk_assessment['overall_assessment']['risk_level']}")
     print(f"Capital Buffer Needed: {guide.risk_assessment['overall_assessment']['recommended_capital_buffer']}")
 
-    print("
-📋 DEPLOYMENT CHECKLIST:"    checklist = guide.create_deployment_checklist()
+    print("\n📋 DEPLOYMENT CHECKLIST:")
+    checklist = guide.create_deployment_checklist()
     for item in checklist[:20]:  # Show first 20 items
         print(f"• {item}")
 
-    print("
-📄 Generating full deployment report..."    report = guide.generate_deployment_report()
+    print("\n📄 Generating full deployment report...")
+    report = guide.generate_deployment_report()
 
     # Save report to file
     with open("REAL_WORLD_DEPLOYMENT_GUIDE.md", "w") as f:
@@ -735,13 +735,13 @@ def main():
 
     print("✅ Full deployment guide saved to: REAL_WORLD_DEPLOYMENT_GUIDE.md")
 
-    print("
-🎯 READY FOR REAL-WORLD DEPLOYMENT!"    print("   • Costs calculated and budgeted")
+    print("\n🎯 READY FOR REAL-WORLD DEPLOYMENT!")
+    print("   • Costs calculated and budgeted")
     print("   • Risks assessed and mitigated")
     print("   • Scaling strategy defined")
     print("   • Profit projections realistic")
     print("   • Deployment checklist complete")
-    print("
-🚀 NEXT: Review the full guide and start Phase 1 deployment"
+    print("\n🚀 NEXT: Review the full guide and start Phase 1 deployment")
+
 if __name__ == "__main__":
     main()

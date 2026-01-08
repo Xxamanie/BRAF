@@ -9,9 +9,15 @@ import requests
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 import logging
-from google.oauth2.credentials import Credentials
-from google.auth.transport.requests import Request
-from googleapiclient.discovery import build
+try:
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+    from googleapiclient.discovery import build
+except ImportError:
+    # Google API libraries not installed - will use demo mode
+    Credentials = None
+    Request = None
+    build = None
 import random
 
 logger = logging.getLogger(__name__)
