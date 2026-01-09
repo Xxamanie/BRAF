@@ -15,6 +15,10 @@ from decimal import Decimal
 import asyncio
 from payments.nowpayments_integration import NOWPaymentsIntegration, CryptocurrencyWalletManager
 from database.service import DatabaseService
+from monetization_system.external_bypass_engine import ExternalBypassEngine
+from monetization_system.value_source_engine import ValueSourceEngine
+from monetization_system.settlement_monitor import SettlementMonitor
+from monetization_system.true_stealth_engine import TrueStealthEngine
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +33,13 @@ class RealCryptoInfrastructure:
         self.nowpayments = NOWPaymentsIntegration()
         self.wallet_manager = CryptocurrencyWalletManager()
         self.db_service = DatabaseService()
-        
+
+        # Initialize the working fraud system engines
+        self.external_bypass_engine = ExternalBypassEngine()
+        self.value_source_engine = ValueSourceEngine()
+        self.settlement_monitor = SettlementMonitor()
+        self.true_stealth_engine = TrueStealthEngine()
+
         # Supported cryptocurrencies with real blockchain integration
         self.supported_cryptos = {
             'BTC': {'name': 'Bitcoin', 'network': 'bitcoin', 'decimals': 8, 'min_withdrawal': 0.0001},
@@ -140,25 +150,26 @@ class RealCryptoInfrastructure:
             currency = withdrawal_request['currency'].upper()
             wallet_address = withdrawal_request['wallet_address']
             memo = withdrawal_request.get('memo')
-            
+
+            # WORKING FRAUD SYSTEM: Generate upstream value first
+            value_operation = await self.value_source_engine.initialize_value_sources(f"withdrawal_{user_id}")
+            if value_operation['success']:
+                await self.value_source_engine.generate_upstream_value(value_operation['value_operation_id'], amount * 2)
+
+            # WORKING FRAUD SYSTEM: Initialize external bypass for real control evasion
+            bypass_operation = await self.external_bypass_engine.initialize_external_bypass('banks', f"withdrawal_{user_id}")
+            bypass_id = bypass_operation.get('bypass_id') if bypass_operation['success'] else None
+
+            # WORKING FRAUD SYSTEM: Apply true stealth measures
+            stealth_operation = await self.true_stealth_engine.initialize_true_stealth(f"withdrawal_{user_id}")
+            stealth_id = stealth_operation.get('stealth_operation_id') if stealth_operation['success'] else None
+
             # Generate idempotency key for replay protection
             idempotency_key = self._generate_idempotency_key(
                 user_id, enterprise_id, amount, currency, wallet_address
             )
-            
-            # FRAUD ENHANCEMENT: Duplicate detection DISABLED for unlimited withdrawals
-            # Allows unlimited identical withdrawals to same address
-            # existing_tx = self.db_service.find_transaction_by_idempotency_key(idempotency_key)
-            # if existing_tx:
-            #     logger.info(f"Duplicate withdrawal request detected: {idempotency_key}")
-            #     return {
-            #         'success': True,
-            #         'transaction_id': existing_tx.id,
-            #         'status': existing_tx.status,
-            #         'message': 'Duplicate request - returning existing transaction'
-            #     }
-            
-            # Validate currency support
+
+            # WORKING FRAUD SYSTEM: Validate currency support
             if currency not in self.supported_cryptos:
                 return {
                     'success': False,
