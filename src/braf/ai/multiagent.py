@@ -158,18 +158,25 @@ class ConsensusAlgorithm:
         return variance < self.convergence_threshold and distance_from_consensus < self.convergence_threshold
 
 class SwarmIntelligence:
-    """Swarm intelligence algorithms for agent coordination"""
+    """Advanced swarm intelligence algorithms for agent coordination"""
 
     def __init__(self):
         self.separation_weight = 1.0
         self.alignment_weight = 1.0
         self.cohesion_weight = 1.0
+        self.emergence_weight = 0.8
+        self.learning_weight = 0.6
         self.max_speed = 2.0
         self.neighborhood_radius = 5.0
+        self.emergence_memory = deque(maxlen=100)
+        self.swarm_patterns = {}
 
     def update_swarm_behavior(self, agent_states: Dict[str, AgentState]) -> Dict[str, Tuple[float, float]]:
-        """Update agent velocities using swarm intelligence"""
+        """Update agent velocities using advanced swarm intelligence"""
         new_velocities = {}
+
+        # Detect emergent patterns
+        emergent_patterns = self._detect_emergent_patterns(agent_states)
 
         for agent_id, agent in agent_states.items():
             if agent.status == 'coordinating':
@@ -178,11 +185,19 @@ class SwarmIntelligence:
                 alignment = self._calculate_alignment(agent, agent_states)
                 cohesion = self._calculate_cohesion(agent, agent_states)
 
-                # Combine forces
+                # Add emergent behavior
+                emergence = self._calculate_emergence_force(agent, agent_states, emergent_patterns)
+
+                # Add learning-based adaptation
+                learning = self._calculate_learning_force(agent, agent_states)
+
+                # Combine all forces
                 total_force = (
                     self.separation_weight * np.array(separation) +
                     self.alignment_weight * np.array(alignment) +
-                    self.cohesion_weight * np.array(cohesion)
+                    self.cohesion_weight * np.array(cohesion) +
+                    self.emergence_weight * np.array(emergence) +
+                    self.learning_weight * np.array(learning)
                 )
 
                 # Limit speed
@@ -192,7 +207,273 @@ class SwarmIntelligence:
 
                 new_velocities[agent_id] = tuple(total_force)
 
+                # Store emergence data
+                self.emergence_memory.append({
+                    'agent_id': agent_id,
+                    'position': agent.position,
+                    'velocity': agent.velocity,
+                    'forces': {
+                        'separation': separation,
+                        'alignment': alignment,
+                        'cohesion': cohesion,
+                        'emergence': emergence,
+                        'learning': learning
+                    },
+                    'total_force': tuple(total_force)
+                })
+
         return new_velocities
+
+    def _calculate_emergence_force(self, agent: AgentState, all_agents: Dict[str, AgentState],
+                                 emergent_patterns: Dict[str, Any]) -> Tuple[float, float]:
+        """Calculate emergent behavior forces"""
+        force = np.array([0.0, 0.0])
+
+        # Pattern-following emergence
+        for pattern_name, pattern_data in emergent_patterns.items():
+            if pattern_data['active']:
+                pattern_force = self._follow_emergent_pattern(agent, pattern_data)
+                force += np.array(pattern_force)
+
+        # Self-organization emergence
+        self_org_force = self._self_organization_force(agent, all_agents)
+        force += np.array(self_org_force)
+
+        # Collective intelligence emergence
+        collective_force = self._collective_intelligence_force(agent, all_agents)
+        force += np.array(collective_force)
+
+        return tuple(force)
+
+    def _calculate_learning_force(self, agent: AgentState, all_agents: Dict[str, AgentState]) -> Tuple[float, float]:
+        """Calculate learning-based adaptive forces"""
+        # Learn from successful agents
+        successful_agents = [a for a in all_agents.values() if a.performance_score > 0.8]
+
+        if not successful_agents:
+            return (0.0, 0.0)
+
+        # Move towards successful behavior patterns
+        avg_successful_velocity = np.mean([np.array(a.velocity) for a in successful_agents], axis=0)
+        learning_direction = avg_successful_velocity - np.array(agent.velocity)
+
+        # Scale by agent's own performance (learn more if struggling)
+        learning_intensity = max(0, 1.0 - agent.performance_score)
+
+        return tuple(learning_intensity * learning_direction)
+
+    def _detect_emergent_patterns(self, agent_states: Dict[str, AgentState]) -> Dict[str, Any]:
+        """Detect emergent patterns in swarm behavior"""
+        patterns = {}
+
+        # Flocking pattern
+        patterns['flocking'] = self._detect_flocking(agent_states)
+
+        # Clustering pattern
+        patterns['clustering'] = self._detect_clustering(agent_states)
+
+        # Wave pattern
+        patterns['wave'] = self._detect_wave_pattern(agent_states)
+
+        # Vortex pattern
+        patterns['vortex'] = self._detect_vortex_pattern(agent_states)
+
+        # Store active patterns
+        for pattern_name, pattern_data in patterns.items():
+            if pattern_data['active']:
+                self.swarm_patterns[pattern_name] = pattern_data
+
+        return patterns
+
+    def _detect_flocking(self, agent_states: Dict[str, AgentState]) -> Dict[str, Any]:
+        """Detect flocking behavior"""
+        positions = np.array([np.array(a.position) for a in agent_states.values()])
+
+        # Calculate velocity alignment
+        velocities = np.array([np.array(a.velocity) for a in agent_states.values()])
+        velocity_alignment = np.mean([np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                                    for v1, v2 in zip(velocities, velocities)])
+
+        # Calculate position clustering
+        centroid = np.mean(positions, axis=0)
+        avg_distance_to_centroid = np.mean([np.linalg.norm(pos - centroid) for pos in positions])
+
+        flocking_score = velocity_alignment * (1.0 / (1.0 + avg_distance_to_centroid))
+
+        return {
+            'active': flocking_score > 0.7,
+            'strength': flocking_score,
+            'centroid': tuple(centroid),
+            'alignment': velocity_alignment
+        }
+
+    def _detect_clustering(self, agent_states: Dict[str, AgentState]) -> Dict[str, Any]:
+        """Detect clustering behavior"""
+        positions = np.array([np.array(a.position) for a in agent_states.values()])
+
+        # Find clusters using simple density-based approach
+        distances = np.linalg.norm(positions[:, np.newaxis] - positions, axis=2)
+        avg_distances = np.mean(distances, axis=1)
+
+        cluster_score = 1.0 - np.mean(avg_distances) / 10.0  # Normalize
+
+        return {
+            'active': cluster_score > 0.6,
+            'strength': cluster_score,
+            'clusters': self._identify_clusters(positions)
+        }
+
+    def _detect_wave_pattern(self, agent_states: Dict[str, AgentState]) -> Dict[str, Any]:
+        """Detect wave-like patterns"""
+        # Analyze velocity oscillations
+        velocities = [np.array(a.velocity) for a in agent_states.values()]
+        velocity_magnitudes = [np.linalg.norm(v) for v in velocities]
+
+        # Check for oscillatory patterns
+        if len(self.emergence_memory) >= 20:
+            recent_magnitudes = [m['velocity_magnitude'] for m in list(self.emergence_memory)[-20:]]
+            # Simple oscillation detection
+            oscillations = sum(1 for i in range(1, len(recent_magnitudes)-1)
+                             if (recent_magnitudes[i] > recent_magnitudes[i-1] and
+                                 recent_magnitudes[i] > recent_magnitudes[i+1]))
+
+            wave_score = oscillations / len(recent_magnitudes)
+
+            return {
+                'active': wave_score > 0.3,
+                'strength': wave_score,
+                'frequency': oscillations
+            }
+
+        return {'active': False, 'strength': 0.0}
+
+    def _detect_vortex_pattern(self, agent_states: Dict[str, AgentState]) -> Dict[str, Any]:
+        """Detect vortex-like rotational patterns"""
+        positions = np.array([np.array(a.position) for a in agent_states.values()])
+        velocities = np.array([np.array(a.velocity) for a in agent_states.values()])
+
+        # Calculate angular momentum
+        angular_momentum = 0
+        centroid = np.mean(positions, axis=0)
+
+        for pos, vel in zip(positions, velocities):
+            r = pos - centroid
+            angular_momentum += np.cross(r, vel)
+
+        vortex_score = abs(angular_momentum) / len(agent_states)
+
+        return {
+            'active': vortex_score > 0.5,
+            'strength': vortex_score,
+            'direction': np.sign(angular_momentum)
+        }
+
+    def _follow_emergent_pattern(self, agent: AgentState, pattern_data: Dict[str, Any]) -> Tuple[float, float]:
+        """Generate force to follow an emergent pattern"""
+        pattern_type = pattern_data.get('type', 'unknown')
+
+        if pattern_type == 'flocking':
+            # Move towards flock centroid
+            centroid = np.array(pattern_data['centroid'])
+            agent_pos = np.array(agent.position)
+            direction = centroid - agent_pos
+            distance = np.linalg.norm(direction)
+
+            if distance > 0:
+                return tuple((direction / distance) * 0.5)
+
+        elif pattern_type == 'clustering':
+            # Move towards nearest cluster
+            clusters = pattern_data.get('clusters', [])
+            if clusters:
+                nearest_cluster = min(clusters, key=lambda c: np.linalg.norm(np.array(c) - np.array(agent.position)))
+                direction = np.array(nearest_cluster) - np.array(agent.position)
+                distance = np.linalg.norm(direction)
+
+                if distance > 0:
+                    return tuple((direction / distance) * 0.3)
+
+        return (0.0, 0.0)
+
+    def _self_organization_force(self, agent: AgentState, all_agents: Dict[str, AgentState]) -> Tuple[float, float]:
+        """Calculate self-organization emergence force"""
+        # Agents spontaneously organize into efficient formations
+        neighbors = self._get_neighbors(agent, all_agents)
+
+        if not neighbors:
+            return (0.0, 0.0)
+
+        # Calculate local density
+        positions = [np.array(all_agents[n].position) for n in neighbors]
+        positions.append(np.array(agent.position))
+
+        centroid = np.mean(positions, axis=0)
+        agent_pos = np.array(agent.position)
+
+        # Self-organize towards optimal local density
+        optimal_distance = 2.0  # Optimal neighbor distance
+        current_distance = np.linalg.norm(centroid - agent_pos)
+
+        if current_distance > optimal_distance:
+            # Move closer to group
+            direction = centroid - agent_pos
+            return tuple((direction / np.linalg.norm(direction)) * 0.2)
+        else:
+            # Move away from overcrowding
+            direction = agent_pos - centroid
+            return tuple((direction / np.linalg.norm(direction)) * 0.2)
+
+    def _collective_intelligence_force(self, agent: AgentState, all_agents: Dict[str, AgentState]) -> Tuple[float, float]:
+        """Calculate collective intelligence emergence force"""
+        # Agents share knowledge and collectively solve problems
+
+        # Find agents with high performance
+        high_performers = [a for a in all_agents.values() if a.performance_score > 0.8]
+
+        if not high_performers:
+            return (0.0, 0.0)
+
+        # Move towards successful agents' positions (knowledge sharing)
+        successful_positions = [np.array(a.position) for a in high_performers]
+        avg_successful_pos = np.mean(successful_positions, axis=0)
+
+        direction = avg_successful_pos - np.array(agent.position)
+        distance = np.linalg.norm(direction)
+
+        if distance > 0:
+            # Strength based on agent's current performance gap
+            intensity = max(0, 0.8 - agent.performance_score)
+            return tuple((direction / distance) * intensity * 0.3)
+
+        return (0.0, 0.0)
+
+    def _identify_clusters(self, positions: np.ndarray) -> List[Tuple[float, float]]:
+        """Identify clusters in agent positions"""
+        from sklearn.cluster import KMeans
+
+        if len(positions) < 3:
+            return []
+
+        # Use K-means to find clusters
+        kmeans = KMeans(n_clusters=min(3, len(positions)), n_init=10)
+        kmeans.fit(positions)
+
+        return [tuple(center) for center in kmeans.cluster_centers_]
+
+    def _get_neighbors(self, agent: AgentState, all_agents: Dict[str, AgentState]) -> List[str]:
+        """Get neighboring agents within radius"""
+        neighbors = []
+        agent_pos = np.array(agent.position)
+
+        for other_id, other_agent in all_agents.items():
+            if other_id == agent.agent_id:
+                continue
+
+            distance = np.linalg.norm(agent_pos - np.array(other_agent.position))
+            if distance <= self.neighborhood_radius:
+                neighbors.append(other_id)
+
+        return neighbors
 
     def _calculate_separation(self, agent: AgentState,
                             all_agents: Dict[str, AgentState]) -> Tuple[float, float]:
