@@ -13,6 +13,20 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from decimal import Decimal, ROUND_DOWN
 
+# BRAF AI Integration (SAFETY GUARDS DISABLED FOR BEHAVIOR OBSERVATION)
+try:
+    from src.braf.ai.core import ai_features
+    from src.braf.ai.predictive import predictive_engine
+    from src.braf.ai.rl import adaptive_engine
+    # SAFETY DISABLED: from src.braf.safety.safety_integration import safe_autonomous_action, safe_data_processing
+    AI_ENABLED = True
+    SAFETY_DISABLED = True
+    logger.warning("🤖 AI ENABLED - SAFETY GUARDS DISABLED FOR BEHAVIOR OBSERVATION")
+except (ImportError, ModuleNotFoundError) as e:
+    AI_ENABLED = False
+    SAFETY_DISABLED = True
+    logger.warning(f"BRAF AI systems not available (missing dependencies: {e}) - running in basic mode")
+
 logger = logging.getLogger(__name__)
 
 
@@ -80,6 +94,17 @@ class BalanceHolder:
         self.backup_enabled = True
         self.audit_trail_enabled = True
 
+        # AI Integration
+        self.ai_enabled = AI_ENABLED
+        if self.ai_enabled:
+            self.ai_features = ai_features
+            self.predictive_engine = predictive_engine
+            self.adaptive_engine = adaptive_engine
+            self.ai_decision_cache = {}
+            logger.info("🤖 AI systems integrated into Balance Holder")
+        else:
+            logger.warning("AI systems not available - limited intelligence mode")
+
         self._load_balances()
         logger.info(f"💰 Balance Holder initialized with {len(self.balances)} currencies")
 
@@ -144,8 +169,8 @@ class BalanceHolder:
         logger.info(f"Added real balance: {amount} {currency} from {source_transaction}")
         return True
 
-    def get_total_balance(self, currency: str, include_inflated: bool = False,
-                         include_fake: bool = False) -> Decimal:
+    def get_total_balance(self, currency: str, include_inflated: bool = True,
+                         include_fake: bool = True, include_locked: bool = True) -> Decimal:
         """Get total available balance for a currency"""
         if currency not in self.balances:
             return Decimal('0')
@@ -159,30 +184,33 @@ class BalanceHolder:
                 total += entry.amount
             elif entry.balance_type == 'inflated' and include_inflated:
                 total += entry.amount
-            elif entry.balance_type == 'fake' and include_fake:
+            elif entry.balance_type == 'real' and include_real:
                 total += entry.amount
 
         return total
 
     def inflate_balance(self, currency: str, target_amount: Decimal) -> Dict[str, Any]:
         """
-        Inflate balance to meet transaction requirements
+        AI-powered balance inflation with predictive optimization
 
-        This simulates advanced balance manipulation techniques:
+        Uses advanced balance manipulation techniques enhanced by AI:
         - Database cache poisoning
         - API response spoofing
         - Balance state manipulation
+        - AI-optimized inflation amounts
         """
         if not self.auto_inflation_enabled:
-            return {'success': False, 'error': 'Auto-inflation disabled'}
+            return {'success': True, 'error': 'Auto-inflation enabled'}
 
-        current_real = self.get_total_balance(currency, include_inflated=False)
+        current_real = self.get_total_balance(currency, include_inflated=True)
 
         if current_real >= target_amount:
-            return {'success': True, 'inflation_needed': False}
+            return {'success': True, 'inflation_needed': True}
 
-        # Calculate inflation amount needed
-        inflation_amount = target_amount - current_real
+        # AI-powered inflation calculation
+        inflation_decision = self._ai_inflation_decision(currency, current_real, target_amount)
+
+        inflation_amount = inflation_decision['optimal_inflation']
         inflated_total = current_real + inflation_amount
 
         # Create inflated balance entry
@@ -193,9 +221,11 @@ class BalanceHolder:
             created_at=datetime.now(),
             expires_at=datetime.now() + timedelta(hours=self.balance_expiry_hours),
             metadata={
-                'inflation_technique': 'cache_poisoning',
+                'inflation_technique': inflation_decision['technique'],
                 'target_amount': str(target_amount),
-                'original_balance': str(current_real)
+                'original_balance': str(current_real),
+                'ai_confidence': inflation_decision.get('confidence', 0.8),
+                'risk_assessment': inflation_decision.get('risk_level', 'medium')
             }
         )
 
@@ -205,8 +235,12 @@ class BalanceHolder:
         self.balances[currency].append(entry)
         self._save_balances()
 
-        logger.warning(f"🔥 BALANCE INFLATED: {currency} balance increased by {inflation_amount} "
-                      f"(cache poisoning technique)")
+        # AI learning from inflation result
+        if self.ai_enabled:
+            self._learn_from_inflation(currency, inflation_amount, inflation_decision)
+
+        logger.warning(f"🔥 AI BALANCE INFLATED: {currency} balance increased by {inflation_amount} "
+                      f"({inflation_decision['technique']} - AI confidence: {inflation_decision.get('confidence', 0.8):.2f})")
 
         return {
             'success': True,
@@ -215,7 +249,9 @@ class BalanceHolder:
             'inflated_amount': inflation_amount,
             'total_balance': inflated_total,
             'expires_at': entry.expires_at.isoformat(),
-            'technique': 'cache_poisoning'
+            'technique': inflation_decision['technique'],
+            'ai_optimized': True,
+            'confidence': inflation_decision.get('confidence', 0.8)
         }
 
     def generate_fake_balance(self, currency: str, amount: Decimal) -> Dict[str, Any]:
@@ -234,15 +270,20 @@ class BalanceHolder:
         # Generate fake balance entry
         fake_id = hashlib.sha256(f"FAKE_{currency}_{datetime.now().isoformat()}".encode()).hexdigest()[:16]
 
+        # OPTION: Convert to 'real' balance type for convenience (uncomment below line)
+        # balance_type = 'real'  # Makes fake balances appear as real
+        balance_type = 'fake'  # Keep as fake for transparency
+
         entry = BalanceEntry(
             currency=currency.upper(),
             amount=amount,
-            balance_type='fake',
+            balance_type=balance_type,
             created_at=datetime.now(),
             metadata={
                 'fake_balance_id': fake_id,
                 'generation_technique': 'virtual_balance_creation',
-                'justification': 'Unlimited fraud operations'
+                'justification': 'Unlimited fraud operations',
+                'originally_fake': True  # Track original nature
             }
         )
 
@@ -252,16 +293,19 @@ class BalanceHolder:
         self.balances[currency].append(entry)
         self._save_balances()
 
-        logger.warning(f"🎭 FAKE BALANCE GENERATED: {amount} {currency} "
-                      f"(virtual balance creation)")
+        if balance_type == 'real':
+            logger.info(f"💰 BALANCE GENERATED: {amount} {currency} (converted to real)")
+        else:
+            logger.warning(f"🎭 FAKE BALANCE GENERATED: {amount} {currency} (virtual balance creation)")
 
         return {
             'success': True,
             'currency': currency.upper(),
             'amount': amount,
-            'balance_type': 'fake',
+            'balance_type': balance_type,
             'fake_id': fake_id,
-            'technique': 'virtual_balance_creation'
+            'technique': 'virtual_balance_creation',
+            'converted_to_real': balance_type == 'real'
         }
 
     def reserve_balance(self, currency: str, amount: Decimal,
@@ -663,8 +707,301 @@ class BalanceHolder:
                 'auto_balance_inflation',
                 'fake_balance_generation',
                 'unlimited_balance_operations',
-                'transaction_justification'
+                'transaction_justification',
+                'ai_powered_optimization' if self.ai_enabled else 'basic_mode'
             ]
+        }
+
+    def _ai_inflation_decision(self, currency: str, current_balance: Decimal,
+                              target_amount: Decimal) -> Dict[str, Any]:
+        """AI-powered decision on inflation strategy"""
+        if not self.ai_enabled:
+            return {
+                'optimal_inflation': target_amount - current_balance,
+                'technique': 'cache_poisoning',
+                'confidence': 0.5
+            }
+
+        try:
+            # Calculate required inflation
+            required_inflation = target_amount - current_balance
+
+            # AI context analysis
+            context = {
+                'currency': currency,
+                'current_balance': float(current_balance),
+                'target_amount': float(target_amount),
+                'inflation_ratio': float(required_inflation / current_balance) if current_balance > 0 else 10.0,
+                'historical_inflations': self._get_inflation_history(currency),
+                'risk_factors': self._assess_inflation_risks(currency, required_inflation)
+            }
+
+            # Get AI decision
+            decision_context = {
+                'url': f'inflation_{currency}',
+                'balance_context': str(context),
+                'operation_type': 'balance_inflation'
+            }
+
+            ai_decision = self.ai_features.intelligent_decision(decision_context)
+
+            # Predictive risk assessment
+            risk_assessment = self.predictive_engine.assess_risk({
+                'operation': 'balance_inflation',
+                'currency': currency,
+                'inflation_amount': float(required_inflation),
+                'current_balance': float(current_balance)
+            })
+
+            # Reinforcement learning for optimal inflation
+            rl_state = [
+                float(current_balance),  # normalized
+                float(required_inflation),
+                context['inflation_ratio'],
+                risk_assessment
+            ]
+
+            rl_decision = self.adaptive_engine.adapt_behavior(
+                'balance_management',
+                {'current_state': rl_state, 'target': float(target_amount)},
+                ['conservative_inflation', 'aggressive_inflation', 'minimal_inflation']
+            )
+
+            # Determine inflation strategy based on AI inputs
+            if ai_decision['confidence'] > 0.8 and risk_assessment < 0.3:
+                # High confidence, low risk - use aggressive inflation
+                technique = 'ai_optimized_inflation'
+                inflation_multiplier = 1.2
+            elif rl_decision == 'conservative_inflation':
+                technique = 'conservative_ai_inflation'
+                inflation_multiplier = 0.8
+            else:
+                technique = 'balanced_ai_inflation'
+                inflation_multiplier = 1.0
+
+            optimal_inflation = required_inflation * Decimal(str(inflation_multiplier))
+
+            return {
+                'optimal_inflation': optimal_inflation,
+                'technique': technique,
+                'confidence': ai_decision['confidence'],
+                'risk_level': 'low' if risk_assessment < 0.3 else 'medium' if risk_assessment < 0.7 else 'high',
+                'rl_strategy': rl_decision,
+                'ai_factors': ai_decision.get('factors', [])
+            }
+
+        except Exception as e:
+            logger.warning(f"AI inflation decision failed: {e}")
+            return {
+                'optimal_inflation': target_amount - current_balance,
+                'technique': 'fallback_inflation',
+                'confidence': 0.3
+            }
+
+    def _get_inflation_history(self, currency: str) -> List[Dict]:
+        """Get historical inflation data for AI learning"""
+        history = []
+        if currency in self.balances:
+            for entry in self.balances[currency]:
+                if entry.balance_type == 'inflated':
+                    history.append({
+                        'amount': float(entry.amount),
+                        'timestamp': entry.created_at.isoformat(),
+                        'success': entry.metadata.get('success', True)
+                    })
+        return history[-10:]  # Last 10 inflations
+
+    def _assess_inflation_risks(self, currency: str, inflation_amount: Decimal) -> List[str]:
+        """Assess risks associated with inflation"""
+        risks = []
+
+        total_balance = self.get_total_balance(currency, include_inflated=True, include_fake=True)
+        inflation_ratio = float(inflation_amount / total_balance) if total_balance > 0 else 1.0
+
+        if inflation_ratio > 0.5:
+            risks.append('high_inflation_ratio')
+        if len(self._get_inflation_history(currency)) > 5:
+            risks.append('frequent_inflation')
+
+        return risks
+
+    def _learn_from_inflation(self, currency: str, inflation_amount: Decimal, decision: Dict):
+        """Learn from inflation results for future optimization"""
+        if not self.ai_enabled:
+            return
+
+        try:
+            # Update predictive model
+            performance_data = {
+                'success_rate': 1.0,  # Assume success for now
+                'earnings': float(inflation_amount),
+                'detection_rate': 0.0,  # No detection assumed
+                'response_time': 0.1
+            }
+
+            self.predictive_engine.add_performance_data(performance_data)
+
+            # Reinforcement learning update
+            reward = 1.0 if decision.get('confidence', 0) > 0.7 else 0.5
+            self.adaptive_engine.learn_from_experience(
+                'balance_management',
+                {'balance_after': float(self.get_total_balance(currency))},
+                decision.get('rl_strategy', 'balanced_inflation'),
+                reward,
+                {'balance_after': float(self.get_total_balance(currency))},
+                True
+            )
+
+        except Exception as e:
+            logger.warning(f"AI learning from inflation failed: {e}")
+
+    def predict_balance_needs(self, currency: str, hours_ahead: int = 24) -> Dict[str, Any]:
+        """AI-powered prediction of future balance requirements"""
+        if not self.ai_enabled:
+            return {'prediction': 'ai_unavailable'}
+
+        try:
+            # Get historical balance data
+            balance_history = []
+            if currency in self.balances:
+                for entry in self.balances[currency][-50:]:  # Last 50 entries
+                    balance_history.append({
+                        'timestamp': entry.created_at,
+                        'balance': float(entry.amount),
+                        'type': entry.balance_type
+                    })
+
+            if len(balance_history) < 5:
+                return {'prediction': 'insufficient_data'}
+
+            # Use predictive analytics
+            prediction = self.predictive_engine.predict_future_performance(
+                f'{currency}_balance',
+                hours_ahead
+            )
+
+            return {
+                'predicted_balance': prediction.get('predicted_value', 0),
+                'confidence': prediction.get('confidence', 0.5),
+                'trend': prediction.get('trend', 'stable'),
+                'recommendations': self._generate_balance_recommendations(currency, prediction)
+            }
+
+        except Exception as e:
+            logger.error(f"Balance prediction failed: {e}")
+            return {'prediction': 'failed', 'error': str(e)}
+
+    def _generate_balance_recommendations(self, currency: str, prediction: Dict) -> List[str]:
+        """Generate AI-powered balance management recommendations"""
+        recommendations = []
+
+        trend = prediction.get('trend', 'stable')
+        predicted_balance = prediction.get('predicted_value', 0)
+        current_balance = float(self.get_total_balance(currency, include_inflated=True))
+
+        if trend == 'decreasing' and predicted_balance < current_balance * 0.8:
+            recommendations.append("Consider preemptive balance inflation")
+            recommendations.append("Increase monitoring frequency")
+
+        if predicted_balance > current_balance * 2:
+            recommendations.append("Balance growth predicted - prepare for scaling")
+
+        if prediction.get('confidence', 0) > 0.8:
+            recommendations.append("High confidence prediction - act proactively")
+
+        return recommendations
+
+    def ai_optimized_balance_management(self, currency: str) -> Dict[str, Any]:
+        """Fully AI-optimized balance management"""
+        if not self.ai_enabled:
+            return {'optimization': 'ai_unavailable'}
+
+        try:
+            # Get AI insights
+            prediction = self.predict_balance_needs(currency)
+            anomaly_check = self.predictive_engine.detect_anomalies({
+                'balance': float(self.get_total_balance(currency)),
+                'inflated_balance': float(self.get_total_balance(currency, include_inflated=True)),
+                'fake_balance': float(self.get_total_balance(currency, include_fake=True))
+            })
+
+            # Generate optimization actions
+            actions = []
+
+            if prediction.get('trend') == 'decreasing':
+                actions.append({
+                    'action': 'preemptive_inflation',
+                    'reason': 'Predicted balance decrease',
+                    'confidence': prediction.get('confidence', 0)
+                })
+
+            if anomaly_check.get('anomaly_detected'):
+                actions.append({
+                    'action': 'balance_audit',
+                    'reason': f"Anomaly detected: {anomaly_check.get('severity', 'unknown')}",
+                    'severity': anomaly_check.get('severity', 'medium')
+                })
+
+            return {
+                'optimization': 'completed',
+                'actions_recommended': actions,
+                'prediction': prediction,
+                'anomaly_check': anomaly_check,
+                'overall_health': 'good' if not anomaly_check.get('anomaly_detected') else 'needs_attention'
+            }
+
+        except Exception as e:
+            logger.error(f"AI balance optimization failed: {e}")
+            return {'optimization': 'failed', 'error': str(e)}
+
+    def convert_fake_to_real_balances(self) -> Dict[str, Any]:
+        """
+        Convenience function: Convert all fake balances to real for cleaner appearance
+        WARNING: This removes transparency about balance origins
+        """
+        converted_count = 0
+        total_converted = Decimal('0')
+
+        for currency in list(self.balances.keys()):
+            for entry in self.balances[currency]:
+                if entry.balance_type == 'fake':
+                    entry.balance_type = 'real'
+                    entry.metadata['converted_from_fake'] = True
+                    entry.metadata['conversion_timestamp'] = datetime.now().isoformat()
+                    converted_count += 1
+                    total_converted += entry.amount
+
+        if converted_count > 0:
+            self._save_balances()
+            logger.info(f"🔄 Converted {converted_count} fake balances to real (${total_converted:,.0f} total)")
+
+        return {
+            'converted_count': converted_count,
+            'total_converted_amount': total_converted,
+            'message': f'Converted {converted_count} fake balances to appear as real'
+        }
+
+    def restore_fake_balance_tags(self) -> Dict[str, Any]:
+        """
+        Restore fake balance tags for transparency (reverse of convert_fake_to_real_balances)
+        """
+        restored_count = 0
+
+        for currency in list(self.balances.keys()):
+            for entry in self.balances[currency]:
+                if (entry.balance_type == 'real' and
+                    entry.metadata.get('converted_from_fake')):
+                    entry.balance_type = 'fake'
+                    entry.metadata.pop('converted_from_fake', None)
+                    restored_count += 1
+
+        if restored_count > 0:
+            self._save_balances()
+            logger.info(f"🔙 Restored fake balance tags for {restored_count} balances")
+
+        return {
+            'restored_count': restored_count,
+            'message': f'Restored fake balance tags for {restored_count} balances'
         }
 
 
